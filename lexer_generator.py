@@ -38,6 +38,8 @@ reserved = {
 	'with' : 'WITH'
 }
 
+
+
 tokens = [
 	#special symbols
 	'PLUS',
@@ -63,7 +65,8 @@ tokens = [
 	'LESS_THAN_EQUAL',
 	'GREATER_THAN_EQUAL',
 	'IDENTIFIER',
-	'NUMBER'
+	'NUMBER',
+	'newline'
 ] + list(reserved.values())
 
 t_PLUS = r'\+'
@@ -88,18 +91,17 @@ t_LESS_THAN = r'<'
 t_GREATER_THAN = r'>'
 t_LESS_THAN_EQUAL = r'<='
 t_GREATER_THAN_EQUAL = r'>='
-t_IDENTIFIER = r'[a-zA-Z_][0-9a-zA-Z_]*'
 t_NUMBER = r'[0-9]+'
 
-def t_ID(t):
+def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value,'ID')    # Check for reserved words
+    t.type = reserved.get(t.value,"IDENTIFIER")    # Check for reserved words
     return t
 
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
-
+    return t
 # A string containing ignored characters (spaces and tabs)
 t_ignore  = ' \t'
 
@@ -110,13 +112,15 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
-
-source = raw_input()
-lexer.input(source)
-
+f = open('test.pas','r')
+lexer.input(f.read())
+output = ""
 # Tokenize
 while True:
     tok = lexer.token()
     if not tok: break      # No more input
-    print tok
-
+    if (tok.type == 'newline'):
+    	print output
+    	output = ""
+    else:
+    	output += " " + tok.type
