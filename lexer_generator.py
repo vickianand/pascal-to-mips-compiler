@@ -153,10 +153,11 @@ modifiers = {
 
 tokens = [
 	#OPERATORS
-	'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
-	# 'OR', 'AND', 'NOT', 'XOR', 'LSHIFT', 'RSHIFT', 'LOR', 'LAND', 'LNOT',
-    'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
-	
+	'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER',
+	'LSHIFT', 'RSHIFT', #'LOR', 'LAND', 'LNOT',
+    'LT', 'LEQ', 'GT', 'GEQ', 'EQ', 'NE', 'GT_NT',
+	'POINTER', 'AT', 'DOLLAR', 'HASH', 'AMP', 'PERCENT',
+	'PLUS_EQ', 'MINUS_EQ','TIMES_EQ','DIVIDE_EQ',
 	'COLON',
 	'ASSIGNMENT',
 	'DOT',
@@ -183,6 +184,26 @@ t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDE = r'/'
+t_POWER = r'\*\*'
+t_LSHIFT = r'\<\<'
+t_RSHIFT = r'\>\>'
+t_LT = r'<'
+t_GT = r'>'
+t_LEQ = r'<='
+t_GEQ = r'>='
+t_EQ = r'='
+t_NE = r'\<\>'
+t_GT_NT = r'\>\<'
+t_POINTER = r'\^'
+t_AT = r'\@'
+t_DOLLAR = r'\$'
+t_HASH = r'\#'
+t_AMP = r'\&'
+t_PERCENT =r'\%'
+t_PLUS_EQ = r'\+\='
+t_MINUS_EQ = r'\-\='
+t_TIMES_EQ = r'\*\='
+t_DIVIDE_EQ = r'\/\='
 t_COLON = r'\:'
 t_ASSIGNMENT = r'\='
 t_DOT = r'\.'
@@ -191,23 +212,18 @@ t_L_SQUARE_BRACKET = r'\['
 t_R_SQUARE_BRACKET = r'\]'
 t_L_CURLY_BRACKET = r'\{'
 t_R_CURLY_BRACKET = r'\}'
-t_BACK_TICK = r'`'
+t_BACK_TICK = r'\`'
 t_COMMA = r'\,'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-# t_LCOMMENT = r'\(\*'
-# t_RCOMMENT = r'\*\)'
-t_LT = r'<'
-t_GT = r'>'
-t_LE = r'<='
-t_GE = r'>='
-t_NUMBER = r'[0-9]+'
+# t_LCOMMENT = r'(\(\*)'
+# t_RCOMMENT = r'(\*\))'
+t_NUMBER = r'([0-9]+)(\.[0-9]+|)(e[0-9]+|)'
 t_STRING = r'\'.*?\''
 
 def t_COMMENT(t):
-    r'/\*.*\*/|\(\*.*\*\)|{.*}'
+    r'(/\*)(.|\n)*\*/|\(\*.(.|\n)*\*\)|{.*}'
     # pass
-    return t
     # No return value. Token discarded	
 
 # Like Pascal reserved words, identifiers are case insensitive
@@ -218,11 +234,17 @@ def t_IDENTIFIER(t):
     	t.type = modifiers.get(t.value,"IDENTIFIER")
     return t
 
-
+output = ""
+curr_line = ""
 
 def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
+	r'\n+'
+	t.lexer.lineno += len(t.value)
+	global output
+	global curr_line
+	print  curr_line + '\t (* ' + output +' *)\n'
+	output = ""
+	curr_line = ""
     # return t
 # A string containing ignored characters (spaces and tabs)
 t_ignore  = ' \t'
@@ -236,12 +258,10 @@ def t_error(t):
 lexer = lex.lex()
 f = open('test.pas','r')
 
-for line in f:
-	lexer.input(line.lower())		# converted to lower case because python is a case insensitive language
-	output = line.rstrip('\n') + '\t\\\\'
-	# Tokenize
-	while True:
-	    tok = lexer.token()
-	    if not tok: break      # No more input
-	    output += " " + tok.type
-	print output
+lexer.input(f.read().lower())		# converted to lower case because pascal is a case insensitive language
+# Tokenize
+while True:
+    tok = lexer.token()
+    if not tok: break      # No more input
+    output += " " + tok.type
+    curr_line += " "+ str(tok.value)
