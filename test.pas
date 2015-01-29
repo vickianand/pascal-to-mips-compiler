@@ -3,10 +3,10 @@ var
 	a, b, c: array of Longint; (*hi there
 		whats up
 		gsgsgsg*)
-t = 2.3E4
-t = 2E3
+t = -2.3E4
+t = 2E-3
 t = 2.0
-t = 2344
+t = 23 - 44
 t = 1E4
 begin
 	while (t > 0) do

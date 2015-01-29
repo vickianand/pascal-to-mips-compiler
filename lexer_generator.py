@@ -218,7 +218,7 @@ t_LPAREN = r'\('
 t_RPAREN = r'\)'
 # t_LCOMMENT = r'(\(\*)'
 # t_RCOMMENT = r'(\*\))'
-t_NUMBER = r'([0-9]+)(\.[0-9]+|)(e[0-9]+|)'
+t_NUMBER = r'([+-]|)([0-9]+)(\.[0-9]+|)(e([+-]|)[0-9]+|)'
 t_STRING = r'\'.*?\''
 
 def t_COMMENT(t):
