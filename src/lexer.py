@@ -234,7 +234,7 @@ t_HEXADECIMAL_NUMBER = r'\$([0-9]|[a-f]|[A-F])*'
 t_STRING = r'(\'.*?\')|\#(' + t_B10_NUMBER + '|' + t_BIN_NUMBER + '|' + t_OCTAL_NUMBER + '|' + t_HEXADECIMAL_NUMBER+')'
 
 def t_COMMENT(t):
-    r'(/\*)(.|\n)*\*/|\(\*.(.|\n)*\*\)|{.*}| (//.*)'
+    r'(//.*)|(/\*)(.|\n)*\*/|\(\*(.|\n)*\*\)|{(.|\n)*}'
     # pass
     # No return value. Token discarded	
 
@@ -259,7 +259,14 @@ def t_newline(t):
 	curr_line = ""
     # return t
 # A string containing ignored characters (spaces and tabs)
-t_ignore  = ' \t'
+
+# t_ignore  = ' \t'
+def t_indent(t):
+	r'\ |\t'
+	global output
+	global curr_line
+	curr_line += t.value
+
 
 # Error handling rule
 def t_error(t):
@@ -279,4 +286,7 @@ while True:
     tok = lexer.token()
     if not tok: break      # No more input
     output += " " + tok.type
-    curr_line += " "+ str(tok.value)
+    curr_line += str(tok.value)
+
+if output != '':
+	print  curr_line + '\t (* ' + output +' *)'
