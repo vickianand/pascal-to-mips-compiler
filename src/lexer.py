@@ -178,23 +178,26 @@ tokens = [
 	'COMMENT',
 
 	'IDENTIFIER',
-	'NUMBER',
+	'B10_NUMBER',
+	'BIN_NUMBER',
+	'OCTAL_NUMBER',
+	'HEXADECIMAL_NUMBER',
 	'STRING'
 	# 'newline'
 ] + list(reserved.values()) + list(modifiers.values())
 
 t_PLUS = r'\+'
-t_MINUS = r'-'
+t_MINUS = r'\-'
 t_TIMES = r'\*'
-t_DIVIDE = r'/'
+t_DIVIDE = r'\/'
 t_POWER = r'\*\*'
 t_LSHIFT = r'\<\<'
 t_RSHIFT = r'\>\>'
-t_LT = r'<'
-t_GT = r'>'
-t_LEQ = r'<='
-t_GEQ = r'>='
-t_EQ = r'='
+t_LT = r'\<'
+t_GT = r'\>'
+t_LEQ = r'\<\='
+t_GEQ = r'\>\='
+t_EQ = r'\='
 t_NE = r'\<\>'
 t_GT_NT = r'\>\<'
 t_POINTER = r'\^'
@@ -208,7 +211,7 @@ t_MINUS_EQ = r'\-\='
 t_TIMES_EQ = r'\*\='
 t_DIVIDE_EQ = r'\/\='
 t_COLON = r'\:'
-t_ASSIGNMENT = r'\='
+t_ASSIGNMENT = r'\:\='
 t_DOT = r'\.'
 t_SEMI_COLON = r'\;'
 t_L_SQUARE_BRACKET = r'\['
@@ -221,18 +224,24 @@ t_LPAREN = r'\('
 t_RPAREN = r'\)'
 # t_LCOMMENT = r'(\(\*)'
 # t_RCOMMENT = r'(\*\))'
-t_NUMBER = r'([0-9]+)(\.[0-9]+|)(e([+-]|)[0-9]+|)'
-t_STRING = r'\'.*?\''
+t_B10_NUMBER = r'([0-9]+)(\.[0-9]+|)([eE]([+-]|)[0-9]+|)'
+t_BIN_NUMBER = r'\%[01]*'
+t_OCTAL_NUMBER = r'\&[0-7]*'
+t_HEXADECIMAL_NUMBER = r'\$([0-9]|[a-f]|[A-F])*'
+
+
+
+t_STRING = r'(\'.*?\')|\#(' + t_B10_NUMBER + '|' + t_BIN_NUMBER + '|' + t_OCTAL_NUMBER + '|' + t_HEXADECIMAL_NUMBER+')'
 
 def t_COMMENT(t):
-    r'(/\*)(.|\n)*\*/|\(\*.(.|\n)*\*\)|{.*}'
+    r'(/\*)(.|\n)*\*/|\(\*.(.|\n)*\*\)|{.*}| (//.*)'
     # pass
     # No return value. Token discarded	
 
 # Like Pascal reserved words, identifiers are case insensitive
 def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value,"IDENTIFIER")    # Check for reserved words
+    t.type = reserved.get(t.value.lower(),"IDENTIFIER")    # Check for reserved words
     if t.type == 'IDENTIFIER':
     	t.type = modifiers.get(t.value,"IDENTIFIER")
     return t
@@ -264,7 +273,7 @@ input_file = sys.argv[1]
 
 f = open(input_file,'r')
 
-lexer.input(f.read().lower())		# converted to lower case because pascal is a case insensitive language
+lexer.input(f.read())		# converted to lower case because pascal is a case insensitive language
 # Tokenize
 while True:
     tok = lexer.token()

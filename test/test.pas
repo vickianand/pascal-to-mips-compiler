@@ -1,3 +1,20 @@
+_ ` //ghhhhh
+
+// Valid comment (* No longer valid comment !!  
+    *) 
+
+    { Comment 1 (* comment 2 *) }  
+(* Comment 1 { comment 2 } *)  
+{ comment 1 // Comment 2 }  
+(* comment 1 // Comment 2 *)  
+// comment 1 (* comment 2 *)  
+// comment 1 { comment 2 } 
+
+abc := &01234
+
+abc := $ffFF124
+
+abc := %01001001
 var
 	t, n, q, l, r, g, i: Longint;
 	a, b, c: array of Longint; (*hi there
@@ -8,6 +25,20 @@ t = 2E-3
 t = 2.0
 t = 23 - 44
 t = 1E4
+
+
+abc := &01234
+
+abc := $ffFF124
+
+abc := %01001001
+
+
+ 'This is a pascal string' 
+  ''  
+  "'a'"  
+  'A tabulator character: ’#9’ is easy to embed'
+  #$ffFF124
 begin
 	while (t > 0) do
 	begin

@@ -12,4 +12,4 @@ Instructions for running the lexer
 Language feature not handled by our lexer
 =========================================
 *       We are not handling the multiline comments involving unbalanced number of comment start and end symbols.
-
+*		As of version 2.5.1 it is possible to use reserved words as identifiers by escaping them with a & sign. But we are not handling it
