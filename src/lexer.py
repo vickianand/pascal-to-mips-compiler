@@ -2,7 +2,6 @@
 
 import sys
 import ply.lex as lex
-
 # We have to deal with five differen type of tokens which are there in pascal
 # These are:	1) reserved words	words which have a fixed meaning in the language.
 #				2) identifiers	programmer defined names of symbols. can be changed. subject to scope rules of language.
@@ -164,6 +163,7 @@ tokens = [
 	'COLON',
 	'ASSIGNMENT',
 	'DOT',
+	'DOTDOT',
 	'SEMI_COLON',
 	'L_SQUARE_BRACKET',
 	'R_SQUARE_BRACKET',
@@ -182,6 +182,10 @@ tokens = [
 	'BIN_NUMBER',
 	'OCTAL_NUMBER',
 	'HEXADECIMAL_NUMBER',
+	# inserted later during resolving parser errors
+	'DIGITSEQ',
+	'REALNUMBER',
+
 	'STRING'
 	# 'newline'
 ] + list(reserved.values()) + list(modifiers.values())
@@ -213,6 +217,7 @@ t_DIVIDE_EQ = r'\/\='
 t_COLON = r'\:'
 t_ASSIGNMENT = r'\:\='
 t_DOT = r'\.'
+t_DOTDOT = r'\.\.'
 t_SEMI_COLON = r'\;'
 t_L_SQUARE_BRACKET = r'\['
 t_R_SQUARE_BRACKET = r'\]'
@@ -228,6 +233,9 @@ t_B10_NUMBER = r'([0-9]+)(\.[0-9]+|)([eE]([+-]|)[0-9]+|)'
 t_BIN_NUMBER = r'\%[01]*'
 t_OCTAL_NUMBER = r'\&[0-7]*'
 t_HEXADECIMAL_NUMBER = r'\$([0-9]|[a-f]|[A-F])*'
+# inserted later during resolving parser errors
+t_DIGITSEQ = r'([0-9]+)'
+t_REALNUMBER = r'([0-9]+)(\.[0-9]+)([eE]([+-]|)[0-9]+|)'
 
 
 
@@ -254,7 +262,7 @@ def t_newline(t):
 	t.lexer.lineno += len(t.value)
 	global output
 	global curr_line
-	print  curr_line + '\t (* ' + output +' *)'
+	# print  curr_line + '\t (* ' + output +' *)'
 	output = ""
 	curr_line = ""
     # return t
@@ -274,19 +282,5 @@ def t_error(t):
     t.lexer.skip(1)
 
 # Build the lexer
+# lexer = lex.lex(debug = 1)
 lexer = lex.lex()
-
-input_file = sys.argv[1]
-
-f = open(input_file,'r')
-
-lexer.input(f.read())		# converted to lower case because pascal is a case insensitive language
-# Tokenize
-while True:
-    tok = lexer.token()
-    if not tok: break      # No more input
-    output += " " + tok.type
-    curr_line += str(tok.value)
-
-if output != '':
-	print  curr_line + '\t (* ' + output +' *)'
