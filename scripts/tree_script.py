@@ -23,7 +23,7 @@ def symbol_type(s) :
 
 node_names = {}
 
-prod_file = open("production.out", "w")
+prod_file = open("productions.out", "w")
 tree_file = open("parse_tree.dot", "w")
 
 tree_file.write("digraph \"Parse Tree\" {\n")
