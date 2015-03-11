@@ -178,7 +178,7 @@ tokens = [
 	'COMMENT',
 
 	'IDENTIFIER',
-	'B10_NUMBER',
+	# 'B10_NUMBER',
 	'BIN_NUMBER',
 	'OCTAL_NUMBER',
 	'HEXADECIMAL_NUMBER',
@@ -229,18 +229,40 @@ t_LPAREN = r'\('
 t_RPAREN = r'\)'
 # t_LCOMMENT = r'(\(\*)'
 # t_RCOMMENT = r'(\*\))'
-t_B10_NUMBER = r'([0-9]+)(\.[0-9]+|)([eE]([+-]|)[0-9]+|)'
-t_BIN_NUMBER = r'\%[01]*'
-t_OCTAL_NUMBER = r'\&[0-7]*'
-t_HEXADECIMAL_NUMBER = r'\$([0-9]|[a-f]|[A-F])*'
 # inserted later during resolving parser errors
 t_DIGITSEQ = r'([0-9]+)'
-t_REALNUMBER = r'([0-9]+)(\.[0-9]+)([eE]([+-]|)[0-9]+|)'
+# t_REALNUMBER = r'([0-9]+)(\.[0-9]+)([eE]([+-]|)[0-9]+|)'
+# t_B10_NUMBER = r'([0-9]+)(\.[0-9]+|)([eE]([+-]|)[0-9]+|)'
 
+def t_BIN_NUMBER(t):
+	r'\%[01]*'
+	t.value = int(t.value[1:],2)
+	t.type = 'DIGITSEQ'
+	return t
 
+def t_OCTAL_NUMBER(t):
+	r'\%[01]*'
+	t.value = int(t.value[1:],8)
+	t.type = 'DIGITSEQ'
+	return t
 
-t_STRING = r'(\'.*?\')|\#(' + t_B10_NUMBER + '|' + t_BIN_NUMBER + '|' + t_OCTAL_NUMBER + '|' + t_HEXADECIMAL_NUMBER+')'
+def t_HEXADECIMAL_NUMBER(t):
+	r'\%[01]*'
+	t.value = int(t.value[1:],16)
+	t.type = 'DIGITSEQ'
+	return t
 
+def t_REALNUMBER(t):
+	r'([0-9]+)(\.[0-9]+|)([eE]([+-]|)[0-9]+|)'
+	if '.' in t.value:
+		t.value = float(t.value)
+	else:
+		t.type = 'DIGITSEQ'
+		t.value = int(t.value)
+	return t
+
+# t_STRING = r'(\'.*?\')|\#(' + t_B10_NUMBER + '|' + t_BIN_NUMBER + '|' + t_OCTAL_NUMBER + '|' + t_HEXADECIMAL_NUMBER+')'
+t_STRING = r'(\'.*?\')'#|\#(' + t_B10_NUMBER + '|' + t_BIN_NUMBER + '|' + t_OCTAL_NUMBER + '|' + t_HEXADECIMAL_NUMBER+')'
 def t_COMMENT(t):
     r'(//.*)|(/\*)(.|\n)*\*/|\(\*(.|\n)*\*\)|{(.|\n)*}'
     # pass

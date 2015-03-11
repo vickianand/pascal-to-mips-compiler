@@ -88,10 +88,6 @@ sign : PLUS
 
 non_string : DIGITSEQ
  | identifier
- | B10_NUMBER
- | BIN_NUMBER
- | OCTAL_NUMBER
- | HEXADECIMAL_NUMBER
  ;
 
 type_definition_part : RESERVED_TYPE type_definition_list
@@ -314,6 +310,7 @@ non_labeled_closed_statement : assignment_statement
  | closed_if_statement
  | closed_while_statement
  | closed_for_statement
+ | exit_statement
  |
  ;
 
@@ -356,6 +353,10 @@ closed_if_statement : RESERVED_IF boolean_expression RESERVED_THEN closed_statem
 
 assignment_statement : variable_access ASSIGNMENT expression
  ;
+
+exit_statement : RESERVED_EXIT
+;
+
 
 variable_access : identifier
  | indexed_variable

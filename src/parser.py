@@ -163,18 +163,6 @@ def p_non_string_1(p):
 def p_non_string_2(p):
 	'non_string :  identifier'
 
-def p_non_string_3(p):
-	'non_string :  B10_NUMBER'
-
-def p_non_string_4(p):
-	'non_string :  BIN_NUMBER'
-
-def p_non_string_5(p):
-	'non_string :  OCTAL_NUMBER'
-
-def p_non_string_6(p):
-	'non_string :  HEXADECIMAL_NUMBER'
-
 
 
 def p_type_definition_part_1(p):
@@ -634,6 +622,9 @@ def p_non_labeled_closed_statement_10(p):
 	'non_labeled_closed_statement :  closed_for_statement'
 
 def p_non_labeled_closed_statement_11(p):
+	'non_labeled_closed_statement :  exit_statement'
+
+def p_non_labeled_closed_statement_12(p):
 	'non_labeled_closed_statement : '
 
 
@@ -704,6 +695,8 @@ def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
 
 
+def p_exit_statement_1(p):
+	'exit_statement : RESERVED_EXIT'
 
 def p_variable_access_1(p):
 	'variable_access :  identifier'
