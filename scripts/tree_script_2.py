@@ -54,7 +54,7 @@ with open("debug_parse.out", "r") as f:
 					lhs_suffix = 0
 				else :
 					lhs_suffix = lhs_stack.pop()
-				for rhs_token in rhs_tokens :
+				for i, rhs_token in enumerate(rhs_tokens) :
 					if rhs_token == "<empty>" :
 						rhs_token = "empty"
 					rhs_suffix = node_names.get(rhs_token, 0) + 1
@@ -70,6 +70,13 @@ with open("debug_parse.out", "r") as f:
 					tree_file.write("\n\t"+rhs_token+str(rhs_suffix)+" [label = \"" +rhs_token+ "\"] ")
 					
 					tree_file.write( "\n\t"+prod_lhs+str(lhs_suffix)+" -> "+rhs_token+str(rhs_suffix)+"\n" )
+
+					if(symbol_type(rhs_token) == "terminal") :
+						terminal_val = action_line.split('] with [')[1].split(']')[0].split(',')[i]
+						# terminal_val = terminal_val.lstrip('\'').rstrip('\'')
+						tree_file.write("\n\t\"val = "+terminal_val+str(rhs_suffix)+"\" [label = \"val = " +terminal_val+ "\"] ")
+						# tree_file.write( "\n\t"+rhs_token+str(rhs_suffix)+" -> "+terminal_val+str(rhs_suffix)+"\n" )
+						tree_file.write( "\n\t"+rhs_token+str(rhs_suffix)+" -> \"val = "+terminal_val+str(rhs_suffix)+"\"\n" )
 
 tree_file.write("\n\n}")
 
