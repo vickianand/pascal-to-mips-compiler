@@ -235,8 +235,8 @@ procedure_heading : procedure_identification
  | procedure_identification formal_parameter_list
  ;
 
-directive : MODIFIER_FORWARD
- | MODIFIER_EXTERNAL
+directive : RESERVED_FORWARD
+ | RESERVED_EXTERNAL
  ;
 
 formal_parameter_list : LPAREN formal_parameter_section_list RPAREN ;
@@ -412,8 +412,8 @@ case_list_element_list : case_list_element_list semicolon case_list_element
 case_list_element : case_constant_list COLON statement
  ;
 
-otherwisepart : MODIFIER_OTHERWISE
- | MODIFIER_OTHERWISE COLON
+otherwisepart : RESERVED_OTHERWISE
+ | RESERVED_OTHERWISE COLON
  ;
 
 control_variable : identifier ;
@@ -491,6 +491,7 @@ member_designator : member_designator DOTDOT expression
 addop : PLUS
  | MINUS
  | RESERVED_OR
+ | RESERVED_XOR
  ;
 
 mulop : TIMES

@@ -22,7 +22,7 @@ reserved = {
 	'absolute' : 'RESERVED_ABSOLUTE',
 	'and' : 'RESERVED_AND',
 	'array' : 'RESERVED_ARRAY',
-	'asm' : 'RESERVED_ASM',
+	# 'asm' : 'RESERVED_ASM',
 	'begin' : 'RESERVED_BEGIN',
 	'case' : 'RESERVED_CASE',
 	'const' : 'RESERVED_CONST',
@@ -38,7 +38,7 @@ reserved = {
 	'function' : 'RESERVED_FUNCTION',
 	'goto' : 'RESERVED_GOTO',
 	'if' : 'RESERVED_IF',
-	'implementation' : 'RESERVED_IMPLEMENTATION',
+	# 'implementation' : 'RESERVED_IMPLEMENTATION',
 	'in' : 'RESERVED_IN',
 	'inherited' : 'RESERVED_INHERITED',
 	'inline' : 'RESERVED_INLINE',
@@ -55,9 +55,9 @@ reserved = {
 	'procedure' : 'RESERVED_PROCEDURE',
 	'program' : 'RESERVED_PROGRAM',
 	'record' : 'RESERVED_RECORD',
-	'reintroduce' : 'RESERVED_REINTRODUCE',
+	# 'reintroduce' : 'RESERVED_REINTRODUCE',
 	'repeat' : 'RESERVED_REPEAT',
-	'self' : 'RESERVED_SELF',
+	# 'self' : 'RESERVED_SELF',
 	'set' : 'RESERVED_SET',
 	'shl' : 'RESERVED_SHL',
 	'shr' : 'RESERVED_SHR',
@@ -73,78 +73,80 @@ reserved = {
 	'with' : 'RESERVED_WITH',
 	'xor' : 'RESERVED_XOR',
 	# following are not part of turbo pascal resrved words but included in free pascal
-	'dispose' : 'RESERVED_DISPOSE',
+	# 'dispose' : 'RESERVED_DISPOSE',
 	'exit' : 'RESERVED_EXIT',
 	'false' : 'RESERVED_FALSE',
 	'new' : 'RESERVED_NEW',
-	'true' : 'RESERVED_TRUE'
-
+	'true' : 'RESERVED_TRUE',
+	'external' : 'RESERVED_EXTERNAL',
+	'forward' : 'RESERVED_FORWARD',
+	'otherwise' : 'RESERVED_OTHERWISE'
 }
 
 # The following is a list of all modifiers. They are not exactly reserved words in the sense that they can
 # be used as identifiers, but in specific places, they have a special meaning for the compiler, i.e., the
 # compiler considers them as part of the Pascal language.
-modifiers = {
-	'abstract' : 'MODIFIER_ABSTRACT',
-	'alias' : 'MODIFIER_ALIAS',
-	'assembler' : 'MODIFIER_ASSEMBLER',
-	'bitpacked' : 'MODIFIER_BITPACKED',
-	'break' : 'MODIFIER_BREAK',
-	'cdecl' : 'MODIFIER_CDECL',
-	'continue' : 'MODIFIER_CONTINUE',
-	'cppdecl' : 'MODIFIER_CPPDECL',
-	'cvar' : 'MODIFIER_CVAR',
-	'default' : 'MODIFIER_DEFAULT',
-	'deprecated' : 'MODIFIER_DEPRECATED',
-	'dynamic' : 'MODIFIER_DYNAMIC',
-	'enumerator' : 'MODIFIER_ENUMERATOR',
-	'experimental' : 'MODIFIER_EXPERIMENTAL',
-	'export' : 'MODIFIER_EXPORT',
-	'external' : 'MODIFIER_EXTERNAL',
-	'far' : 'MODIFIER_FAR',
-	'far16' : 'MODIFIER_FAR16',
-	'forward' : 'MODIFIER_FORWARD',
-	'generic' : 'MODIFIER_GENERIC',
-	'helper' : 'MODIFIER_HELPER',
-	'implements' : 'MODIFIER_IMPLEMENTS',
-	'index' : 'MODIFIER_INDEX',
-	'interrupt' : 'MODIFIER_INTERRUPT',
-	'iochecks' : 'MODIFIER_IOCHECKS',
-	'local' : 'MODIFIER_LOCAL',
-	'message' : 'MODIFIER_MESSAGE',
-	'name' : 'MODIFIER_NAME',
-	'near' : 'MODIFIER_NEAR',
-	'nodefault' : 'MODIFIER_NODEFAULT',
-	'noreturn' : 'MODIFIER_NORETURN',
-	'nostackframe' : 'MODIFIER_NOSTACKFRAME',
-	'oldfpccall' : 'MODIFIER_OLDFPCCALL',
-	'otherwise' : 'MODIFIER_OTHERWISE',
-	'overload' : 'MODIFIER_OVERLOAD',
-	'override' : 'MODIFIER_OVERRIDE',
-	'pascal' : 'MODIFIER_PASCAL',
-	'platform' : 'MODIFIER_PLATFORM',
-	'private' : 'MODIFIER_PRIVATE',
-	'protected' : 'MODIFIER_PROTECTED',
-	'public' : 'MODIFIER_PUBLIC',
-	'published' : 'MODIFIER_PUBLISHED',
-	'read' : 'MODIFIER_READ',
-	'register' : 'MODIFIER_REGISTER',
-	'reintroduce' : 'MODIFIER_REINTRODUCE',
-	'result' : 'MODIFIER_RESULT',
-	'safecall' : 'MODIFIER_SAFECALL',
-	'saveregisters' : 'MODIFIER_SAVEREGISTERS',
-	'softfloat' : 'MODIFIER_SOFTFLOAT',
-	'specialize' : 'MODIFIER_SPECIALIZE',
-	'static' : 'MODIFIER_STATIC',
-	'stdcall' : 'MODIFIER_STDCALL',
-	'stored' : 'MODIFIER_STORED',
-	'strict' : 'MODIFIER_STRICT',
-	'unaligned' : 'MODIFIER_UNALIGNED',
-	'unimplemented' : 'MODIFIER_UNIMPLEMENTED',
-	'varargs' : 'MODIFIER_VARARGS',
-	'virtual' : 'MODIFIER_VIRTUAL',
-	'write' : 'MODIFIER_WRITE'
-}
+# modifiers = {
+# 	'abstract' : 'MODIFIER_ABSTRACT',
+# 	'alias' : 'MODIFIER_ALIAS',
+# 	'assembler' : 'MODIFIER_ASSEMBLER',
+# 	'bitpacked' : 'MODIFIER_BITPACKED',
+# 	'break' : 'MODIFIER_BREAK',
+# 	'cdecl' : 'MODIFIER_CDECL',
+# 	'continue' : 'MODIFIER_CONTINUE',
+# 	'cppdecl' : 'MODIFIER_CPPDECL',
+# 	'cvar' : 'MODIFIER_CVAR',
+# 	'default' : 'MODIFIER_DEFAULT',
+# 	'deprecated' : 'MODIFIER_DEPRECATED',
+# 	'dynamic' : 'MODIFIER_DYNAMIC',
+# 	'enumerator' : 'MODIFIER_ENUMERATOR',
+# 	'experimental' : 'MODIFIER_EXPERIMENTAL',
+# 	'export' : 'MODIFIER_EXPORT',
+	
+# 	'far' : 'MODIFIER_FAR',
+# 	'far16' : 'MODIFIER_FAR16',
+	
+# 	'generic' : 'MODIFIER_GENERIC',
+# 	'helper' : 'MODIFIER_HELPER',
+# 	'implements' : 'MODIFIER_IMPLEMENTS',
+# 	'index' : 'MODIFIER_INDEX',
+# 	'interrupt' : 'MODIFIER_INTERRUPT',
+# 	'iochecks' : 'MODIFIER_IOCHECKS',
+# 	'local' : 'MODIFIER_LOCAL',
+# 	'message' : 'MODIFIER_MESSAGE',
+# 	'name' : 'MODIFIER_NAME',
+# 	'near' : 'MODIFIER_NEAR',
+# 	'nodefault' : 'MODIFIER_NODEFAULT',
+# 	'noreturn' : 'MODIFIER_NORETURN',
+# 	'nostackframe' : 'MODIFIER_NOSTACKFRAME',
+# 	'oldfpccall' : 'MODIFIER_OLDFPCCALL',
+	
+# 	'overload' : 'MODIFIER_OVERLOAD',
+# 	'override' : 'MODIFIER_OVERRIDE',
+# 	'pascal' : 'MODIFIER_PASCAL',
+# 	'platform' : 'MODIFIER_PLATFORM',
+# 	'private' : 'MODIFIER_PRIVATE',
+# 	'protected' : 'MODIFIER_PROTECTED',
+# 	'public' : 'MODIFIER_PUBLIC',
+# 	'published' : 'MODIFIER_PUBLISHED',
+# 	'read' : 'MODIFIER_READ',
+# 	'register' : 'MODIFIER_REGISTER',
+# 	'reintroduce' : 'MODIFIER_REINTRODUCE',
+# 	'result' : 'MODIFIER_RESULT',
+# 	'safecall' : 'MODIFIER_SAFECALL',
+# 	'saveregisters' : 'MODIFIER_SAVEREGISTERS',
+# 	'softfloat' : 'MODIFIER_SOFTFLOAT',
+# 	'specialize' : 'MODIFIER_SPECIALIZE',
+# 	'static' : 'MODIFIER_STATIC',
+# 	'stdcall' : 'MODIFIER_STDCALL',
+# 	'stored' : 'MODIFIER_STORED',
+# 	'strict' : 'MODIFIER_STRICT',
+# 	'unaligned' : 'MODIFIER_UNALIGNED',
+# 	'unimplemented' : 'MODIFIER_UNIMPLEMENTED',
+# 	'varargs' : 'MODIFIER_VARARGS',
+# 	'virtual' : 'MODIFIER_VIRTUAL',
+# 	'write' : 'MODIFIER_WRITE'
+# }
 
 
 # Remark: Predefined types such as Byte, Boolean and constants such as maxint are not reserved words.
@@ -158,7 +160,7 @@ tokens = [
 	'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER',
 	'LSHIFT', 'RSHIFT', #'LOR', 'LAND', 'LNOT',
     'LT', 'LEQ', 'GT', 'GEQ', 'EQ', 'NE', 'GT_NT',
-	'POINTER', 'AT', 'DOLLAR', 'HASH', 'AMP', 'PERCENT',
+	'POINTER', 'AT', 'DOLLAR', 'HASH', 'PERCENT',
 	'PLUS_EQ', 'MINUS_EQ','TIMES_EQ','DIVIDE_EQ',
 	'COLON',
 	'ASSIGNMENT',
@@ -188,7 +190,7 @@ tokens = [
 
 	'STRING'
 	# 'newline'
-] + list(reserved.values()) + list(modifiers.values())
+] + list(reserved.values()) #+ list(modifiers.values())
 
 t_PLUS = r'\+'
 t_MINUS = r'\-'
@@ -208,7 +210,7 @@ t_POINTER = r'\^'
 t_AT = r'\@'
 t_DOLLAR = r'\$'
 t_HASH = r'\#'
-t_AMP = r'\&'
+# t_AMP = r'\&'
 t_PERCENT =r'\%'
 t_PLUS_EQ = r'\+\='
 t_MINUS_EQ = r'\-\='
@@ -272,8 +274,12 @@ def t_COMMENT(t):
 def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value.lower(),"IDENTIFIER")    # Check for reserved words
-    if t.type == 'IDENTIFIER':
-    	t.type = modifiers.get(t.value,"IDENTIFIER")
+    if t.type == 'RESERVED_FALSE':
+    	t.vale = 0
+    	t.type = 'DIGITSEQ'
+    if t.type == 'RESERVED_TRUE':
+    	t.vale = 1
+    	t.type = 'DIGITSEQ'
     return t
 
 output = ""

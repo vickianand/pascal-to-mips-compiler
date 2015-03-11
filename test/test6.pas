@@ -5,8 +5,9 @@ the franc, dollar, pound sterling, mark, ruble, yen,
 guilder will have been devalued in 1, 2, ... ,n years.}
 const
 	MaxYears = 10;
+	hello = 0;
 var
-	Year: O .. MaxYears;
+	Year: hello..MaxYears;
 	Factor1, Factor2, Factor3: Real;
 begin
 	Year := 0;
@@ -14,10 +15,10 @@ begin
 	Writeln(' Year  7%  8%  10%'); Writeln;
 	repeat
 		Year := Year + 1;
+		Year := Year xor 2;
 		Factor1 := Factor1 * 1.07;
 		Factor2 := Factor2 * 1.08;
 		Factor3 := Factor3 * 1.10;
 		Writeln(Year: 5, Factor1: 7:3, Factor2: 7:3, Factor3 :7:3);
 	until Year = MaxYears
-	exit;
 end .

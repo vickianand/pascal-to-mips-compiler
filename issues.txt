@@ -1,0 +1,3 @@
+AMP removed.
+true -> digitseq 1
+false -> digitseq 0

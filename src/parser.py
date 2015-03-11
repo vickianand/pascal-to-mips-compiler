@@ -451,10 +451,10 @@ def p_procedure_heading_2(p):
 
 
 def p_directive_1(p):
-	'directive :  MODIFIER_FORWARD'
+	'directive :  RESERVED_FORWARD'
 
 def p_directive_2(p):
-	'directive :  MODIFIER_EXTERNAL'
+	'directive :  RESERVED_EXTERNAL'
 
 
 
@@ -805,10 +805,10 @@ def p_case_list_element_1(p):
 
 
 def p_otherwisepart_1(p):
-	'otherwisepart :  MODIFIER_OTHERWISE'
+	'otherwisepart :  RESERVED_OTHERWISE'
 
 def p_otherwisepart_2(p):
-	'otherwisepart :  MODIFIER_OTHERWISE COLON'
+	'otherwisepart :  RESERVED_OTHERWISE COLON'
 
 
 
@@ -975,6 +975,8 @@ def p_addop_2(p):
 def p_addop_3(p):
 	'addop : RESERVED_OR'
 
+def p_addop_4(p):
+	'addop : RESERVED_XOR'
 
 
 def p_mulop_1(p):
@@ -1032,7 +1034,7 @@ def p_comma_1(p):
 
 
 def p_error(p):
-	print "some error occured in while parsing!"
+	print "Unexpected token " + str(p.value) + " found."
 
 
 parser = yacc.yacc()
