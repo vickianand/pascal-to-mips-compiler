@@ -73,7 +73,8 @@ with open("debug_parse.out", "r") as f:
 
 					if(symbol_type(rhs_token) == "terminal") :
 						terminal_val = action_line.split('] with [')[1].split(']')[0].split(',')[i]
-						# terminal_val = terminal_val.lstrip('\'').rstrip('\'')
+						
+						terminal_val = terminal_val.lstrip('\"').rstrip('\"')
 						tree_file.write("\n\t\"val = "+terminal_val+str(rhs_suffix)+"\" [label = \"val = " +terminal_val+ "\"] ")
 						# tree_file.write( "\n\t"+rhs_token+str(rhs_suffix)+" -> "+terminal_val+str(rhs_suffix)+"\n" )
 						tree_file.write( "\n\t"+rhs_token+str(rhs_suffix)+" -> \"val = "+terminal_val+str(rhs_suffix)+"\"\n" )

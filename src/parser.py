@@ -1,8 +1,6 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
 
-
-
 def p_file_1(p):
 	'file :  program'
 
@@ -33,20 +31,67 @@ def p_identifier_list_2(p):
 
 
 def p_block_1(p):
-	'block :  label_declaration_part constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part statement_part'
+	'block :  declaration_part_list statement_part'
+
+def p_block_2(p):
+	'block :  statement_part'
+
+
+
+def p_declaration_part_list_1(p):
+	'declaration_part_list :  declaration_part_list declaration_entity'
+
+def p_declaration_part_list_2(p):
+	'declaration_part_list :  declaration_entity'
+
+
+
+def p_declaration_entity_1(p):
+	'declaration_entity :  label_declaration_part'
+
+def p_declaration_entity_2(p):
+	'declaration_entity :  constant_definition_part'
+
+def p_declaration_entity_3(p):
+	'declaration_entity :  type_definition_part'
+
+def p_declaration_entity_4(p):
+	'declaration_entity :  variable_declaration_part'
+
+def p_declaration_entity_5(p):
+	'declaration_entity :  procedure_and_function_declaration_part'
 
 
 
 def p_module_1(p):
-	'module :  constant_definition_part type_definition_part variable_declaration_part procedure_and_function_declaration_part'
+	'module :  module_declaration_part_list'
+
+
+
+def p_module_declaration_part_list_1(p):
+	'module_declaration_part_list :  module_declaration_part_list module_declaration_entity'
+
+def p_module_declaration_part_list_2(p):
+	'module_declaration_part_list :  module_declaration_entity'
+
+
+
+def p_module_declaration_entity_1(p):
+	'module_declaration_entity :  constant_definition_part'
+
+def p_module_declaration_entity_2(p):
+	'module_declaration_entity :  type_definition_part'
+
+def p_module_declaration_entity_3(p):
+	'module_declaration_entity :  variable_declaration_part'
+
+def p_module_declaration_entity_4(p):
+	'module_declaration_entity :  procedure_and_function_declaration_part'
 
 
 
 def p_label_declaration_part_1(p):
 	'label_declaration_part :  RESERVED_LABEL label_list semicolon'
-
-def p_label_declaration_part_2(p):
-	'label_declaration_part : '
 
 
 
@@ -65,9 +110,6 @@ def p_label_1(p):
 
 def p_constant_definition_part_1(p):
 	'constant_definition_part :  RESERVED_CONST constant_list'
-
-def p_constant_definition_part_2(p):
-	'constant_definition_part : '
 
 
 
@@ -167,9 +209,6 @@ def p_non_string_2(p):
 
 def p_type_definition_part_1(p):
 	'type_definition_part :  RESERVED_TYPE type_definition_list'
-
-def p_type_definition_part_2(p):
-	'type_definition_part : '
 
 
 
@@ -392,9 +431,6 @@ def p_domain_type_1(p):
 def p_variable_declaration_part_1(p):
 	'variable_declaration_part :  RESERVED_VAR variable_declaration_list semicolon'
 
-def p_variable_declaration_part_2(p):
-	'variable_declaration_part : '
-
 
 
 def p_variable_declaration_list_1(p):
@@ -411,26 +447,10 @@ def p_variable_declaration_1(p):
 
 
 def p_procedure_and_function_declaration_part_1(p):
-	'procedure_and_function_declaration_part :   proc_or_func_declaration_list semicolon'
+	'procedure_and_function_declaration_part :  procedure_declaration semicolon'
 
 def p_procedure_and_function_declaration_part_2(p):
-	'procedure_and_function_declaration_part : '
-
-
-
-def p_proc_or_func_declaration_list_1(p):
-	'proc_or_func_declaration_list :    proc_or_func_declaration_list semicolon proc_or_func_declaration'
-
-def p_proc_or_func_declaration_list_2(p):
-	'proc_or_func_declaration_list :  proc_or_func_declaration'
-
-
-
-def p_proc_or_func_declaration_1(p):
-	'proc_or_func_declaration :  procedure_declaration'
-
-def p_proc_or_func_declaration_2(p):
-	'proc_or_func_declaration :  function_declaration'
+	'procedure_and_function_declaration_part :  function_declaration semicolon'
 
 
 
@@ -695,8 +715,11 @@ def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
 
 
+
 def p_exit_statement_1(p):
-	'exit_statement : RESERVED_EXIT'
+	'exit_statement :  RESERVED_EXIT'
+
+
 
 def p_variable_access_1(p):
 	'variable_access :  identifier'
@@ -967,16 +990,17 @@ def p_member_designator_2(p):
 
 
 def p_addop_1(p):
-	'addop : PLUS'
+	'addop :  PLUS'
 
 def p_addop_2(p):
-	'addop : MINUS'
+	'addop :  MINUS'
 
 def p_addop_3(p):
-	'addop : RESERVED_OR'
+	'addop :  RESERVED_OR'
 
 def p_addop_4(p):
-	'addop : RESERVED_XOR'
+	'addop :  RESERVED_XOR'
+
 
 
 def p_mulop_1(p):
@@ -1031,6 +1055,8 @@ def p_semicolon_1(p):
 
 def p_comma_1(p):
 	'comma :  COMMA'
+
+
 
 
 def p_error(p):

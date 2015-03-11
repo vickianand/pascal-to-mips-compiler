@@ -4,4 +4,4 @@
 *.dot
 *.ps
 *.o
-parsetab.py
+*parsetab.py

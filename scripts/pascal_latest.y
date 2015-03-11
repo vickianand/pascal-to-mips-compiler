@@ -14,22 +14,35 @@ identifier_list : identifier_list comma identifier
  | identifier
  ;
 
-block : label_declaration_part
- constant_definition_part
- type_definition_part
- variable_declaration_part
- procedure_and_function_declaration_part
- statement_part
+block : declaration_part_list statement_part
+ | statement_part
+;
+
+declaration_part_list : declaration_part_list declaration_entity
+ | declaration_entity
+;
+
+declaration_entity : label_declaration_part
+ | constant_definition_part
+ | type_definition_part
+ | variable_declaration_part
+ | procedure_and_function_declaration_part
  ;
 
-module : constant_definition_part
- type_definition_part
- variable_declaration_part
- procedure_and_function_declaration_part
+module : module_declaration_part_list
+;
+
+module_declaration_part_list : module_declaration_part_list module_declaration_entity
+ | module_declaration_entity
+;
+
+module_declaration_entity : constant_definition_part
+ | type_definition_part
+ | variable_declaration_part
+ | procedure_and_function_declaration_part
  ;
 
 label_declaration_part : RESERVED_LABEL label_list semicolon
- |
  ;
 
 label_list : label_list comma label
@@ -40,7 +53,6 @@ label : DIGITSEQ
  ;
 
 constant_definition_part : RESERVED_CONST constant_list
- |
  ;
 
 constant_list : constant_list constant_definition
@@ -91,7 +103,6 @@ non_string : DIGITSEQ
  ;
 
 type_definition_part : RESERVED_TYPE type_definition_list
- |
  ;
 
 type_definition_list : type_definition_list type_definition
@@ -202,7 +213,6 @@ new_pointer_type : POINTER domain_type
 domain_type : identifier ;
 
 variable_declaration_part : RESERVED_VAR variable_declaration_list semicolon
- |
  ;
 
 variable_declaration_list :
@@ -213,18 +223,9 @@ variable_declaration_list :
 variable_declaration : identifier_list COLON type_denoter
  ;
 
-procedure_and_function_declaration_part :
-  proc_or_func_declaration_list semicolon
- |
- ;
 
-proc_or_func_declaration_list :
-   proc_or_func_declaration_list semicolon proc_or_func_declaration
- | proc_or_func_declaration
- ;
-
-proc_or_func_declaration : procedure_declaration
- | function_declaration
+procedure_and_function_declaration_part : procedure_declaration semicolon
+ | function_declaration semicolon
  ;
 
 procedure_declaration : procedure_heading semicolon directive
