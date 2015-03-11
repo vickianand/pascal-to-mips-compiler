@@ -3,3 +3,5 @@
 *.out
 *.dot
 *.ps
+*.o
+parsetab.py
