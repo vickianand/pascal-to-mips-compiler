@@ -15,8 +15,8 @@ Pascal to MIPS compiler written in python
 ### Instructions for running the parser
 *       parser.py is present in src/ directory.
 *       Run command: ```python src/parser.py test/hello.pas 2> debug_parse.out``` . We need the stderr debug content in debug_parse.out file.
-*       Then run command: ```python script/tree_script.py``` .  This will generate productions.out and parse_tree.dot file.
-*		Finally run ```dot -Tps parse_tree.dot - o parse_tree.ps``` . The generated parse_tree.ps file contailns the image of the tree.
+*       Then run command: ```python scripts/tree_script.py``` .  This will generate productions.out and parse_tree.dot file.
+*		Finally run ```dot -Tps parse_tree.dot -o parse_tree.ps``` . The generated parse_tree.ps file contailns the image of the tree.
 
 
 ### Language feature not handled by our lexer

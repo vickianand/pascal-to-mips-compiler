@@ -42,6 +42,13 @@ Procedure Input;
     End;
     close(f);
  End;
+<<<<<<< Updated upstream
 // Begin
 //  Input;
 // End.
+=======
+ 
+Begin
+ Input;
+End.
+>>>>>>> Stashed changes
