@@ -19,15 +19,15 @@ import ply.lex as lex
 
 # Reserved words are part of the Pascal language, and as such, cannot be redefined by the programmer
 reserved = {
-	'absolute' : 'RESERVED_ABSOLUTE',
+	# 'absolute' : 'RESERVED_ABSOLUTE',
 	'and' : 'RESERVED_AND',
 	'array' : 'RESERVED_ARRAY',
 	# 'asm' : 'RESERVED_ASM',
 	'begin' : 'RESERVED_BEGIN',
 	'case' : 'RESERVED_CASE',
 	'const' : 'RESERVED_CONST',
-	'constructor' : 'RESERVED_CONSTRUCTOR',
-	'destructor' : 'RESERVED_DESTRUCTOR',
+	# 'constructor' : 'RESERVED_CONSTRUCTOR',
+	# 'destructor' : 'RESERVED_DESTRUCTOR',
 	'div' : 'RESERVED_DIV',
 	'do' : 'RESERVED_DO',
 	'downto' : 'RESERVED_DOWNTO',
@@ -40,16 +40,16 @@ reserved = {
 	'if' : 'RESERVED_IF',
 	# 'implementation' : 'RESERVED_IMPLEMENTATION',
 	'in' : 'RESERVED_IN',
-	'inherited' : 'RESERVED_INHERITED',
-	'inline' : 'RESERVED_INLINE',
-	'interface' : 'RESERVED_INTERFACE',
+	# 'inherited' : 'RESERVED_INHERITED',
+	# 'inline' : 'RESERVED_INLINE',
+	# 'interface' : 'RESERVED_INTERFACE',
 	'label' : 'RESERVED_LABEL',
 	'mod' : 'RESERVED_MOD',
 	'nil' : 'RESERVED_NIL',
 	'not' : 'RESERVED_NOT',
-	'object' : 'RESERVED_OBJECT',
+	# 'object' : 'RESERVED_OBJECT',
 	'of' : 'RESERVED_OF',
-	'operator' : 'RESERVED_OPERATOR',
+	# 'operator' : 'RESERVED_OPERATOR',
 	'or' : 'RESERVED_OR',
 	'packed' : 'RESERVED_PACKED',
 	'procedure' : 'RESERVED_PROCEDURE',
@@ -59,15 +59,15 @@ reserved = {
 	'repeat' : 'RESERVED_REPEAT',
 	# 'self' : 'RESERVED_SELF',
 	'set' : 'RESERVED_SET',
-	'shl' : 'RESERVED_SHL',
-	'shr' : 'RESERVED_SHR',
+	# 'shl' : 'RESERVED_SHL',
+	#'shr' : 'RESERVED_SHR',
 	'string' : 'RESERVED_STRING',
 	'then' : 'RESERVED_THEN',
 	'to' : 'RESERVED_TO',
 	'type' : 'RESERVED_TYPE',
-	'unit' : 'RESERVED_UNIT',
+	# 'unit' : 'RESERVED_UNIT',
 	'until' : 'RESERVED_UNTIL',
-	'uses' : 'RESERVED_USES',
+	# 'uses' : 'RESERVED_USES',
 	'var' : 'RESERVED_VAR',
 	'while' : 'RESERVED_WHILE',
 	'with' : 'RESERVED_WITH',
@@ -76,7 +76,7 @@ reserved = {
 	# 'dispose' : 'RESERVED_DISPOSE',
 	'exit' : 'RESERVED_EXIT',
 	'false' : 'RESERVED_FALSE',
-	'new' : 'RESERVED_NEW',
+	# 'new' : 'RESERVED_NEW',
 	'true' : 'RESERVED_TRUE',
 	'external' : 'RESERVED_EXTERNAL',
 	'forward' : 'RESERVED_FORWARD',
@@ -86,67 +86,67 @@ reserved = {
 # The following is a list of all modifiers. They are not exactly reserved words in the sense that they can
 # be used as identifiers, but in specific places, they have a special meaning for the compiler, i.e., the
 # compiler considers them as part of the Pascal language.
-# modifiers = {
-# 	'abstract' : 'MODIFIER_ABSTRACT',
-# 	'alias' : 'MODIFIER_ALIAS',
-# 	'assembler' : 'MODIFIER_ASSEMBLER',
-# 	'bitpacked' : 'MODIFIER_BITPACKED',
-# 	'break' : 'MODIFIER_BREAK',
-# 	'cdecl' : 'MODIFIER_CDECL',
-# 	'continue' : 'MODIFIER_CONTINUE',
-# 	'cppdecl' : 'MODIFIER_CPPDECL',
-# 	'cvar' : 'MODIFIER_CVAR',
-# 	'default' : 'MODIFIER_DEFAULT',
-# 	'deprecated' : 'MODIFIER_DEPRECATED',
-# 	'dynamic' : 'MODIFIER_DYNAMIC',
-# 	'enumerator' : 'MODIFIER_ENUMERATOR',
-# 	'experimental' : 'MODIFIER_EXPERIMENTAL',
-# 	'export' : 'MODIFIER_EXPORT',
+modifiers = {
+	'abstract' : 'MODIFIER_ABSTRACT',
+	'alias' : 'MODIFIER_ALIAS',
+	'assembler' : 'MODIFIER_ASSEMBLER',
+	'bitpacked' : 'MODIFIER_BITPACKED',
+	'break' : 'MODIFIER_BREAK',
+	'cdecl' : 'MODIFIER_CDECL',
+	'continue' : 'MODIFIER_CONTINUE',
+	'cppdecl' : 'MODIFIER_CPPDECL',
+	'cvar' : 'MODIFIER_CVAR',
+	'default' : 'MODIFIER_DEFAULT',
+	'deprecated' : 'MODIFIER_DEPRECATED',
+	'dynamic' : 'MODIFIER_DYNAMIC',
+	'enumerator' : 'MODIFIER_ENUMERATOR',
+	'experimental' : 'MODIFIER_EXPERIMENTAL',
+	'export' : 'MODIFIER_EXPORT',
 	
-# 	'far' : 'MODIFIER_FAR',
-# 	'far16' : 'MODIFIER_FAR16',
+	'far' : 'MODIFIER_FAR',
+	'far16' : 'MODIFIER_FAR16',
 	
-# 	'generic' : 'MODIFIER_GENERIC',
-# 	'helper' : 'MODIFIER_HELPER',
-# 	'implements' : 'MODIFIER_IMPLEMENTS',
-# 	'index' : 'MODIFIER_INDEX',
-# 	'interrupt' : 'MODIFIER_INTERRUPT',
-# 	'iochecks' : 'MODIFIER_IOCHECKS',
-# 	'local' : 'MODIFIER_LOCAL',
-# 	'message' : 'MODIFIER_MESSAGE',
-# 	'name' : 'MODIFIER_NAME',
-# 	'near' : 'MODIFIER_NEAR',
-# 	'nodefault' : 'MODIFIER_NODEFAULT',
-# 	'noreturn' : 'MODIFIER_NORETURN',
-# 	'nostackframe' : 'MODIFIER_NOSTACKFRAME',
-# 	'oldfpccall' : 'MODIFIER_OLDFPCCALL',
+	'generic' : 'MODIFIER_GENERIC',
+	'helper' : 'MODIFIER_HELPER',
+	'implements' : 'MODIFIER_IMPLEMENTS',
+	'index' : 'MODIFIER_INDEX',
+	'interrupt' : 'MODIFIER_INTERRUPT',
+	'iochecks' : 'MODIFIER_IOCHECKS',
+	'local' : 'MODIFIER_LOCAL',
+	'message' : 'MODIFIER_MESSAGE',
+	'name' : 'MODIFIER_NAME',
+	'near' : 'MODIFIER_NEAR',
+	'nodefault' : 'MODIFIER_NODEFAULT',
+	'noreturn' : 'MODIFIER_NORETURN',
+	'nostackframe' : 'MODIFIER_NOSTACKFRAME',
+	'oldfpccall' : 'MODIFIER_OLDFPCCALL',
 	
-# 	'overload' : 'MODIFIER_OVERLOAD',
-# 	'override' : 'MODIFIER_OVERRIDE',
-# 	'pascal' : 'MODIFIER_PASCAL',
-# 	'platform' : 'MODIFIER_PLATFORM',
-# 	'private' : 'MODIFIER_PRIVATE',
-# 	'protected' : 'MODIFIER_PROTECTED',
-# 	'public' : 'MODIFIER_PUBLIC',
-# 	'published' : 'MODIFIER_PUBLISHED',
-# 	'read' : 'MODIFIER_READ',
-# 	'register' : 'MODIFIER_REGISTER',
-# 	'reintroduce' : 'MODIFIER_REINTRODUCE',
-# 	'result' : 'MODIFIER_RESULT',
-# 	'safecall' : 'MODIFIER_SAFECALL',
-# 	'saveregisters' : 'MODIFIER_SAVEREGISTERS',
-# 	'softfloat' : 'MODIFIER_SOFTFLOAT',
-# 	'specialize' : 'MODIFIER_SPECIALIZE',
-# 	'static' : 'MODIFIER_STATIC',
-# 	'stdcall' : 'MODIFIER_STDCALL',
-# 	'stored' : 'MODIFIER_STORED',
-# 	'strict' : 'MODIFIER_STRICT',
-# 	'unaligned' : 'MODIFIER_UNALIGNED',
-# 	'unimplemented' : 'MODIFIER_UNIMPLEMENTED',
-# 	'varargs' : 'MODIFIER_VARARGS',
-# 	'virtual' : 'MODIFIER_VIRTUAL',
-# 	'write' : 'MODIFIER_WRITE'
-# }
+	'overload' : 'MODIFIER_OVERLOAD',
+	'override' : 'MODIFIER_OVERRIDE',
+	'pascal' : 'MODIFIER_PASCAL',
+	'platform' : 'MODIFIER_PLATFORM',
+	'private' : 'MODIFIER_PRIVATE',
+	'protected' : 'MODIFIER_PROTECTED',
+	'public' : 'MODIFIER_PUBLIC',
+	'published' : 'MODIFIER_PUBLISHED',
+	'read' : 'MODIFIER_READ',
+	'register' : 'MODIFIER_REGISTER',
+	'reintroduce' : 'MODIFIER_REINTRODUCE',
+	'result' : 'MODIFIER_RESULT',
+	'safecall' : 'MODIFIER_SAFECALL',
+	'saveregisters' : 'MODIFIER_SAVEREGISTERS',
+	'softfloat' : 'MODIFIER_SOFTFLOAT',
+	'specialize' : 'MODIFIER_SPECIALIZE',
+	'static' : 'MODIFIER_STATIC',
+	'stdcall' : 'MODIFIER_STDCALL',
+	'stored' : 'MODIFIER_STORED',
+	'strict' : 'MODIFIER_STRICT',
+	'unaligned' : 'MODIFIER_UNALIGNED',
+	'unimplemented' : 'MODIFIER_UNIMPLEMENTED',
+	'varargs' : 'MODIFIER_VARARGS',
+	'virtual' : 'MODIFIER_VIRTUAL',
+	'write' : 'MODIFIER_WRITE'
+}
 
 
 # Remark: Predefined types such as Byte, Boolean and constants such as maxint are not reserved words.
@@ -158,10 +158,10 @@ reserved = {
 tokens = [
 	#OPERATORS
 	'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER',
-	'LSHIFT', 'RSHIFT', #'LOR', 'LAND', 'LNOT',
-    'LT', 'LEQ', 'GT', 'GEQ', 'EQ', 'NE', 'GT_NT',
-	'POINTER', 'AT', 'DOLLAR', 'HASH', 'PERCENT',
-	'PLUS_EQ', 'MINUS_EQ','TIMES_EQ','DIVIDE_EQ',
+	#'LSHIFT', 'RSHIFT', 'LOR', 'LAND', 'LNOT',
+    'LT', 'LEQ', 'GT', 'GEQ', 'EQ', 'NE', #'GT_NT',
+	'POINTER', 'AT',# 'DOLLAR', 'HASH',
+	 'PERCENT',	'PLUS_EQ', 'MINUS_EQ','TIMES_EQ','DIVIDE_EQ',
 	'COLON',
 	'ASSIGNMENT',
 	'DOT',
@@ -169,8 +169,8 @@ tokens = [
 	'SEMI_COLON',
 	'L_SQUARE_BRACKET',
 	'R_SQUARE_BRACKET',
-	'L_CURLY_BRACKET',
-	'R_CURLY_BRACKET',
+	# 'L_CURLY_BRACKET',
+	# 'R_CURLY_BRACKET',
 	'BACK_TICK',
 	'COMMA',
 	'LPAREN',
@@ -197,19 +197,19 @@ t_MINUS = r'\-'
 t_TIMES = r'\*'
 t_DIVIDE = r'\/'
 t_POWER = r'\*\*'
-t_LSHIFT = r'\<\<'
-t_RSHIFT = r'\>\>'
+# t_LSHIFT = r'\<\<'
+# t_RSHIFT = r'\>\>'
 t_LT = r'\<'
 t_GT = r'\>'
 t_LEQ = r'\<\='
 t_GEQ = r'\>\='
 t_EQ = r'\='
 t_NE = r'\<\>'
-t_GT_NT = r'\>\<'
+# t_GT_NT = r'\>\<'
 t_POINTER = r'\^'
 t_AT = r'\@'
-t_DOLLAR = r'\$'
-t_HASH = r'\#'
+# t_DOLLAR = r'\$'
+# t_HASH = r'\#'
 # t_AMP = r'\&'
 t_PERCENT =r'\%'
 t_PLUS_EQ = r'\+\='
@@ -223,8 +223,8 @@ t_DOTDOT = r'\.\.'
 t_SEMI_COLON = r'\;'
 t_L_SQUARE_BRACKET = r'\['
 t_R_SQUARE_BRACKET = r'\]'
-t_L_CURLY_BRACKET = r'\{'
-t_R_CURLY_BRACKET = r'\}'
+# t_L_CURLY_BRACKET = r'\{'
+# t_R_CURLY_BRACKET = r'\}'
 t_BACK_TICK = r'\`'
 t_COMMA = r'\,'
 t_LPAREN = r'\('
@@ -266,7 +266,7 @@ def t_REALNUMBER(t):
 # t_STRING = r'(\'.*?\')|\#(' + t_B10_NUMBER + '|' + t_BIN_NUMBER + '|' + t_OCTAL_NUMBER + '|' + t_HEXADECIMAL_NUMBER+')'
 t_STRING = r'(\'.*?\')'#|\#(' + t_B10_NUMBER + '|' + t_BIN_NUMBER + '|' + t_OCTAL_NUMBER + '|' + t_HEXADECIMAL_NUMBER+')'
 def t_COMMENT(t):
-    r'(//.*)|(/\*)(.|\n)*\*/|\(\*(.|\n)*\*\)|{(.|\n)*}'
+    r'(//.*)|(/\*)(.|\n)*?\*/|\(\*(.|\n)*?\*\)|{(.|\n)*?}'
     # pass
     # No return value. Token discarded	
 
@@ -275,10 +275,10 @@ def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value.lower(),"IDENTIFIER")    # Check for reserved words
     if t.type == 'RESERVED_FALSE':
-    	t.vale = 0
+    	t.value = 0
     	t.type = 'DIGITSEQ'
     if t.type == 'RESERVED_TRUE':
-    	t.vale = 1
+    	t.value = 1
     	t.type = 'DIGITSEQ'
     return t
 
@@ -306,7 +306,7 @@ def t_indent(t):
 
 # Error handling rule
 def t_error(t):
-    print "Illegal character '%s'" % t.value[0]
+    print "Illegal character '%s'" % t.value[0] 
     t.lexer.skip(1)
 
 # Build the lexer

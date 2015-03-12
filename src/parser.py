@@ -642,9 +642,6 @@ def p_non_labeled_closed_statement_10(p):
 	'non_labeled_closed_statement :  closed_for_statement'
 
 def p_non_labeled_closed_statement_11(p):
-	'non_labeled_closed_statement :  exit_statement'
-
-def p_non_labeled_closed_statement_12(p):
 	'non_labeled_closed_statement : '
 
 
@@ -713,11 +710,6 @@ def p_closed_if_statement_1(p):
 
 def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
-
-
-
-def p_exit_statement_1(p):
-	'exit_statement :  RESERVED_EXIT'
 
 
 
@@ -1046,6 +1038,12 @@ def p_relop_7(p):
 def p_identifier_1(p):
 	'identifier :  IDENTIFIER'
 
+def p_identifier_2(p):
+	'identifier :  RESERVED_EXIT'
+
+def p_identifier_3(p):
+	'identifier :  RESERVED_STRING'
+
 
 
 def p_semicolon_1(p):
@@ -1058,10 +1056,13 @@ def p_comma_1(p):
 
 
 
-
 def p_error(p):
-	print "Unexpected token " + str(p.value) + " found."
-
+    print "ERROR:Unexpected  field \""+str(p.value)+"\" at line " + str(p.lineno(0)) + ", column " + str(p.lexpos(0)) 
+    # Read ahead looking for a closing '}'
+    while True:
+        tok = parser.token()             # Get the next token
+        if not tok or tok.type == 'RBRACE': break
+    parser.restart()
 
 parser = yacc.yacc()
 

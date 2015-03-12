@@ -311,7 +311,6 @@ non_labeled_closed_statement : assignment_statement
  | closed_if_statement
  | closed_while_statement
  | closed_for_statement
- | exit_statement
  |
  ;
 
@@ -355,8 +354,6 @@ closed_if_statement : RESERVED_IF boolean_expression RESERVED_THEN closed_statem
 assignment_statement : variable_access ASSIGNMENT expression
  ;
 
-exit_statement : RESERVED_EXIT
-;
 
 
 variable_access : identifier
@@ -512,6 +509,8 @@ relop : EQ
  ;
 
 identifier : IDENTIFIER
+ | RESERVED_EXIT
+ | RESERVED_STRING
  ;
 
 semicolon : SEMI_COLON
