@@ -7,7 +7,7 @@ Procedure DoAnExit (Yes : Boolean);
 { This procedure demonstrates the normal Exit }
 
 begin
-  Writeln ('Hello from DoAnExit !')
+  Writeln ('Hello from DoAnExit !');
   If Yes then
     begin
     Writeln ('Bailing out early.');

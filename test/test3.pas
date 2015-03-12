@@ -1,3 +1,5 @@
+program test3;
+
 var
 	t, n, q, l, r, g, i: Longint;
 	a, b, c: array of Longint;

@@ -1,5 +1,5 @@
 program CLPERM;
-uses math;
+// uses math;
  
 var	a: array[ 1..100001 ] of longInt;
  
@@ -35,7 +35,7 @@ begin
 end;
  
 var	t, n, k, i, last, next: longInt;
-	bufIn, bufOut: array[ 1..1 shl 16 ] of byte;
+	bufIn, bufOut: array[ 1..4096 ] of byte;
 	sum: int64;
  
 begin

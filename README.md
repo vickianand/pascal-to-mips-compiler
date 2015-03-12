@@ -21,6 +21,6 @@ Pascal to MIPS compiler written in python
 
 ### Language feature not handled by our lexer
 *       We are not handling the multiline comments involving unbalanced number of comment start and end symbols.
-*	As of version 2.5.1 it is possible to use reserved words as identifiers by escaping them with a '&' symbol. But we are not handling it.
+*		As of version 2.5.1 it is possible to use reserved words as identifiers by escaping them with a '&' symbol. But we are not handling it.
 *       Remark: Predefined types such as Byte, Boolean and constants such as maxint are not reserved words. They are identifiers, declared in the system unit. This means that these types can be redefined in other units. The programmer is however not encouraged to do this, as it will cause a lot of confusion. Lexer therefore recognises types as identifiers only.
 

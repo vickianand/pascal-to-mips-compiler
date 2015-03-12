@@ -287,6 +287,9 @@ def p_structured_type_4(p):
 def p_array_type_1(p):
 	'array_type :  RESERVED_ARRAY L_SQUARE_BRACKET index_list R_SQUARE_BRACKET RESERVED_OF component_type'
 
+def p_array_type_2(p):
+	'array_type :  RESERVED_ARRAY RESERVED_OF component_type'
+
 
 
 def p_index_list_1(p):
@@ -1053,6 +1056,7 @@ def p_semicolon_1(p):
 
 def p_comma_1(p):
 	'comma :  COMMA'
+
 
 
 

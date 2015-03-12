@@ -1,3 +1,5 @@
+program test5;
+
 var
 	t: Integer;
 	i, n: Longint;

@@ -142,6 +142,7 @@ structured_type : array_type
  ;
 
 array_type : RESERVED_ARRAY L_SQUARE_BRACKET index_list R_SQUARE_BRACKET RESERVED_OF component_type
+ | RESERVED_ARRAY RESERVED_OF component_type
  ;
 
 index_list : index_list comma index_type
