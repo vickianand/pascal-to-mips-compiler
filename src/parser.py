@@ -1059,17 +1059,20 @@ def p_comma_1(p):
 
 
 
-
 def p_error(p):
-    print "ERROR:Unexpected  field \""+str(p.value)+"\" at line " + str(p.lineno(0)) + ", column " + str(p.lexpos(0)) 
-    # Read ahead looking for a closing '}'
-    while True:
-        tok = parser.token()             # Get the next token
-        if not tok or tok.type == 'RBRACE': break
-    parser.restart()
+	if p == None:
+		print "ERROR: Token missing at the end of input"
+		return
+	else:
+		print "ERROR: Unexpected token \""+str(p.value)+"\" at line no. " + str(p.lineno)
+	while True:
+		tok = yacc.token()
+		if not tok or tok.type == 'SEMI_COLON': break
+	yacc.errok()
+	return tok
+
 
 parser = yacc.yacc()
-
 
 def parseProgram(program):
     parser.parse(program, lexer=lexer)
