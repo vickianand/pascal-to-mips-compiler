@@ -1,8 +1,11 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
+import symTab
 
 def p_file_1(p):
 	'file :  program'
+
+
 
 def p_file_2(p):
 	'file :  module'
@@ -24,14 +27,23 @@ def p_program_heading_2(p):
 
 def p_identifier_list_1(p):
 	'identifier_list :  identifier_list comma identifier'
+	p[0] = {}
+	p[0]['list_id'] = p[1]['list_id'].append(p[3]['st_entry'])
 
 def p_identifier_list_2(p):
 	'identifier_list :  identifier'
+	p[0] = {}
+	p[0]['list_id'] = [p[1]['st_entry']]
 
 
 
 def p_block_1(p):
 	'block :  declaration_part_list statement_part'
+	p[0] = {}
+	if p[1]['type'] == 'ERROR' or p[2]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
 
 def p_block_2(p):
 	'block :  statement_part'
@@ -40,26 +52,43 @@ def p_block_2(p):
 
 def p_declaration_part_list_1(p):
 	'declaration_part_list :  declaration_part_list declaration_entity'
+	p[0] = {}
+	if p[1]['type'] == 'ERROR' or p[2]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
 
 def p_declaration_part_list_2(p):
 	'declaration_part_list :  declaration_entity'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 
 def p_declaration_entity_1(p):
 	'declaration_entity :  label_declaration_part'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_declaration_entity_2(p):
 	'declaration_entity :  constant_definition_part'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_declaration_entity_3(p):
 	'declaration_entity :  type_definition_part'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_declaration_entity_4(p):
 	'declaration_entity :  variable_declaration_part'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_declaration_entity_5(p):
 	'declaration_entity :  procedure_and_function_declaration_part'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 
@@ -206,10 +235,10 @@ def p_non_string_2(p):
 	'non_string :  identifier'
 
 
+#TYpe definition and declaration part
 
 def p_type_definition_part_1(p):
 	'type_definition_part :  RESERVED_TYPE type_definition_list'
-
 
 
 def p_type_definition_list_1(p):
@@ -225,8 +254,15 @@ def p_type_definition_1(p):
 
 
 
+
 def p_type_denoter_1(p):
 	'type_denoter :  identifier'
+	p[0] = {}
+	st_entry = S_TABLE.look_up(name=p[1]['name'])
+	if st_entry != 'typedef':
+		throw_error("Type not defined")
+	else:
+		p[0]['type'] = p[1]['name']
 
 def p_type_denoter_2(p):
 	'type_denoter :  new_type'
@@ -433,20 +469,31 @@ def p_domain_type_1(p):
 
 def p_variable_declaration_part_1(p):
 	'variable_declaration_part :  RESERVED_VAR variable_declaration_list semicolon'
+	p[0] = {}
+	p[0]['type'] = p[2]['type']
 
 
 
 def p_variable_declaration_list_1(p):
 	'variable_declaration_list :    variable_declaration_list semicolon variable_declaration'
+	p[0] = {}
+	if p[1]['type'] == 'ERROR' or p[3]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
 
 def p_variable_declaration_list_2(p):
 	'variable_declaration_list :  variable_declaration'
-
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 def p_variable_declaration_1(p):
 	'variable_declaration :  identifier_list COLON type_denoter'
-
+	p[0] = {}
+	p[0]['type'] = p[3]['type']
+	for st_entry in p[1]['list_id']:
+		st_entry['type'] = p[3]['type']
 
 
 def p_procedure_and_function_declaration_part_1(p):
@@ -574,92 +621,142 @@ def p_function_block_1(p):
 
 def p_statement_part_1(p):
 	'statement_part :  compound_statement'
-
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 def p_compound_statement_1(p):
 	'compound_statement :  RESERVED_BEGIN statement_sequence RESERVED_END'
-
+	p[0] = {}
+	p[0]['type'] = p[2]['type']
 
 
 def p_statement_sequence_1(p):
 	'statement_sequence :  statement_sequence semicolon statement'
+	p[0] = {}
+	if p[1]['type'] == 'ERROR' or p[3]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
 
 def p_statement_sequence_2(p):
 	'statement_sequence :  statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 
 def p_statement_1(p):
 	'statement :  open_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_statement_2(p):
 	'statement :  closed_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 
 def p_open_statement_1(p):
 	'open_statement :  label COLON non_labeled_open_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_open_statement_2(p):
 	'open_statement :  non_labeled_open_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 
 def p_closed_statement_1(p):
 	'closed_statement :  label COLON non_labeled_closed_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_closed_statement_2(p):
 	'closed_statement :  non_labeled_closed_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 
 def p_non_labeled_closed_statement_1(p):
 	'non_labeled_closed_statement :  assignment_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_2(p):
 	'non_labeled_closed_statement :  procedure_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_3(p):
 	'non_labeled_closed_statement :  goto_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_4(p):
 	'non_labeled_closed_statement :  compound_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_5(p):
 	'non_labeled_closed_statement :  case_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_6(p):
 	'non_labeled_closed_statement :  repeat_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_7(p):
 	'non_labeled_closed_statement :  closed_with_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_8(p):
 	'non_labeled_closed_statement :  closed_if_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_9(p):
 	'non_labeled_closed_statement :  closed_while_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_10(p):
 	'non_labeled_closed_statement :  closed_for_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_11(p):
 	'non_labeled_closed_statement : '
-
+	p[0] = {}
+	p[0]['type'] = 'VOID'
 
 
 def p_non_labeled_open_statement_1(p):
 	'non_labeled_open_statement :  open_with_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_open_statement_2(p):
 	'non_labeled_open_statement :  open_if_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_open_statement_3(p):
 	'non_labeled_open_statement :  open_while_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_open_statement_4(p):
 	'non_labeled_open_statement :  open_for_statement'
+	p[0] = {}
+	p[0]['type'] = p[1]['type']
 
 
 
@@ -713,11 +810,26 @@ def p_closed_if_statement_1(p):
 
 def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
+	p[0] = {}
+	p[1]['type'] = p[3]['type']
+	if p[1]['type'] == 'ERROR' or p[3]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
 
 
 
 def p_variable_access_1(p):
 	'variable_access :  identifier'
+	p[0] = p[1]
+	st_entry = S_TABLE.look_up(name=p[1]['name'])
+	if st_entry is None:
+		throw_error("Variable not declared")
+	elif 'type' not in st_entry:
+		throw_error("Variable not declared")
+	else:
+		p[0]['type'] = st_entry['type']
+
 
 def p_variable_access_2(p):
 	'variable_access :  indexed_variable'
@@ -868,6 +980,7 @@ def p_boolean_expression_1(p):
 
 def p_expression_1(p):
 	'expression :  simple_expression'
+	p[0] = p[1]
 
 def p_expression_2(p):
 	'expression :  simple_expression relop simple_expression'
@@ -876,14 +989,36 @@ def p_expression_2(p):
 
 def p_simple_expression_1(p):
 	'simple_expression :  term'
+	p[0] = p[1]
 
 def p_simple_expression_2(p):
-	'simple_expression :  simple_expression addop term'
+	'simple_expression :  simple_expression addop term' 
+	p[0] = {}
+	if p[1]['type'] == 'Integer' :
+		if p[3]['type'] == 'REAL' or p[3]['type'] == 'Integer':
+			p[0]['type'] = p[3]['type']
+		else:
+			throw_error("type mismatch")
+			p[0]['type'] = 'ERROR'
+	elif p[1]['type'] == 'REAL':
+		if p[3]['type'] == 'REAL' or p[3]['type'] == 'Integer':
+			p[0]['type'] = 'REAL'
+		else:
+			throw_error("type mismatch")
+			p[0]['type'] = 'ERROR'
+	else:
+		throw_error("type mismatch")
+		return
+
+
+
+
 
 
 
 def p_term_1(p):
 	'term :  factor'
+	p[0] = p[1]
 
 def p_term_2(p):
 	'term :  term mulop factor'
@@ -893,30 +1028,37 @@ def p_term_2(p):
 def p_factor_1(p):
 	'factor :  sign factor'
 
+
 def p_factor_2(p):
 	'factor :  exponentiation'
-
+	p[0] = p[1]
 
 
 def p_exponentiation_1(p):
 	'exponentiation :  primary'
+	p[0] = p[1]
 
 def p_exponentiation_2(p):
 	'exponentiation :  primary POWER exponentiation'
 
 
 
+
 def p_primary_1(p):
 	'primary :  variable_access'
+	p[0] = p[1]
 
 def p_primary_2(p):
 	'primary :  unsigned_constant'
+	p[0] = p[1]
 
 def p_primary_3(p):
 	'primary :  function_designator'
+	p[0] = p[1]
 
 def p_primary_4(p):
 	'primary :  set_constructor'
+	p[0] = p[1]
 
 def p_primary_5(p):
 	'primary :  LPAREN expression RPAREN'
@@ -928,30 +1070,34 @@ def p_primary_6(p):
 
 def p_unsigned_constant_1(p):
 	'unsigned_constant :  unsigned_number'
+	p[0] = p[1]
 
 def p_unsigned_constant_2(p):
 	'unsigned_constant :  STRING'
+	p[0] = {'value':p[1],'type':'STRING'}
 
 def p_unsigned_constant_3(p):
 	'unsigned_constant :  RESERVED_NIL'
-
+	p[0] = {'value':None,'type':'NIL'}
 
 
 def p_unsigned_number_1(p):
 	'unsigned_number :  unsigned_integer'
+	p[0] = p[1]
 
 def p_unsigned_number_2(p):
 	'unsigned_number :  unsigned_real'
-
+	p[0] = p[1]
 
 
 def p_unsigned_integer_1(p):
 	'unsigned_integer :  DIGITSEQ'
-
+	p[0] = {'value':p[1],'type':'Integer'}
 
 
 def p_unsigned_real_1(p):
 	'unsigned_real :  REALNUMBER'
+	p[0] = {'value':p[1],'type':'REAL'}
 
 
 
@@ -986,67 +1132,92 @@ def p_member_designator_2(p):
 
 def p_addop_1(p):
 	'addop :  PLUS'
+	p[0] = {'name':p[1]}
 
 def p_addop_2(p):
 	'addop :  MINUS'
+	p[0] = {'name':p[1]}
 
 def p_addop_3(p):
 	'addop :  RESERVED_OR'
+	p[0] = {'name':p[1]}
 
 def p_addop_4(p):
 	'addop :  RESERVED_XOR'
+	p[0] = {'name':p[1]}
 
 
 
 def p_mulop_1(p):
 	'mulop :  TIMES'
+	p[0] = {'name':p[1]}
 
 def p_mulop_2(p):
 	'mulop :  DIVIDE'
+	p[0] = {'name':p[1]}
 
 def p_mulop_3(p):
 	'mulop :  RESERVED_DIV'
+	p[0] = {'name':p[1]}
 
 def p_mulop_4(p):
 	'mulop :  RESERVED_MOD'
+	p[0] = {'name':p[1]}
 
 def p_mulop_5(p):
 	'mulop :  RESERVED_AND'
+	p[0] = {'name':p[1]}
 
 
 
 def p_relop_1(p):
 	'relop :  EQ'
+	p[0] = {'name':p[1]}
 
 def p_relop_2(p):
 	'relop :  NE'
+	p[0] = {'name':p[1]}
 
 def p_relop_3(p):
 	'relop :  LT'
+	p[0] = {'name':p[1]}
 
 def p_relop_4(p):
 	'relop :  GT'
+	p[0] = {'name':p[1]}
 
 def p_relop_5(p):
 	'relop :  LEQ'
+	p[0] = {'name':p[1]}
 
 def p_relop_6(p):
 	'relop :  GEQ'
+	p[0] = {'name':p[1]}
 
 def p_relop_7(p):
 	'relop :  RESERVED_IN'
-
+	p[0] = {'name':p[1]}
 
 
 def p_identifier_1(p):
 	'identifier :  IDENTIFIER'
+	p[0] = {}
+	p[0]['name'] = p[1]
+	st_entry = S_TABLE.look_up(name=p[1])
+	if st_entry is None:
+		p[0]['st_entry'] = S_TABLE.add_id(name=p[1])
+	else:
+		p[0]['st_entry'] = st_entry
 
 def p_identifier_2(p):
 	'identifier :  RESERVED_EXIT'
+	p[0] = {}
+	p[0]['name'] = p[1]
 
 def p_identifier_3(p):
 	'identifier :  RESERVED_STRING'
-
+	p[0] = {}
+	p[0]['name'] = p[1]
 
 
 def p_semicolon_1(p):
@@ -1056,6 +1227,7 @@ def p_semicolon_1(p):
 
 def p_comma_1(p):
 	'comma :  COMMA'
+	
 
 
 
@@ -1071,6 +1243,8 @@ def p_error(p):
 	yacc.errok()
 	return tok
 
+def throw_error(err):
+	print err
 
 parser = yacc.yacc()
 
@@ -1087,5 +1261,5 @@ def testYacc(inputFile):
 if __name__ == "__main__":
     from sys import argv
     filename, inputFile = argv
-
+    S_TABLE = symTab.SymTable()
     testYacc(inputFile)
