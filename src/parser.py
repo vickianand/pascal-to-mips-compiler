@@ -258,7 +258,7 @@ def p_type_definition_1(p):
 def p_type_denoter_1(p):
 	'type_denoter :  identifier'
 	p[0] = {}
-	st_entry = S_TABLE.look_up(name=p[1]['name'])
+	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
 	if st_entry != 'typedef':
 		throw_error("Type not defined")
 	else:
@@ -587,32 +587,51 @@ def p_procedure_block_1(p):
 
 def p_function_declaration_1(p):
 	'function_declaration :  function_heading semicolon directive'
+	S_TABLE.end_scope()
 
 def p_function_declaration_2(p):
 	'function_declaration :  function_identification semicolon function_block'
+	S_TABLE.end_scope()
 
 def p_function_declaration_3(p):
 	'function_declaration :  function_heading semicolon function_block'
+	S_TABLE.end_scope()
 
 
 
 def p_function_heading_1(p):
-	'function_heading :  RESERVED_FUNCTION identifier COLON result_type'
+	'function_heading :  f_begin_token identifier COLON result_type'
 
 def p_function_heading_2(p):
-	'function_heading :  RESERVED_FUNCTION identifier formal_parameter_list COLON result_type'
-
+	'function_heading :  f_begin_token identifier formal_parameter_list COLON result_type'
 
 
 def p_result_type_1(p):
 	'result_type :  identifier'
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
+	if st_entry != 'typedef':
+		throw_error("Type not defined")
+	else:
+		p[0]['type'] = p[1]['name']
+
 
 
 
 def p_function_identification_1(p):
-	'function_identification :  RESERVED_FUNCTION identifier'
+	'function_identification :  f_begin_token identifier'
+	p[0] = p[2]
+	st_entry = S_TABLE.currentScope.look_up(name=p[2]['name'])
+	if st_entry is None:
+		throw_error("Variable not declared")
+	elif 'type' not in st_entry:
+		throw_error("Variable not declared")
+	else:
+		p[0]['type'] = st_entry['type']
 
-
+def p_f_begin_token_1(p):
+	'f_begin_token : RESERVED_FUNCTION'
+	S_TABLE.begin_scope()
 
 def p_function_block_1(p):
 	'function_block :  block'
@@ -822,7 +841,7 @@ def p_assignment_statement_1(p):
 def p_variable_access_1(p):
 	'variable_access :  identifier'
 	p[0] = p[1]
-	st_entry = S_TABLE.look_up(name=p[1]['name'])
+	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
 	if st_entry is None:
 		throw_error("Variable not declared")
 	elif 'type' not in st_entry:
@@ -1203,9 +1222,9 @@ def p_identifier_1(p):
 	'identifier :  IDENTIFIER'
 	p[0] = {}
 	p[0]['name'] = p[1]
-	st_entry = S_TABLE.look_up(name=p[1])
+	st_entry = S_TABLE.currentScope.look_up(name=p[1])
 	if st_entry is None:
-		p[0]['st_entry'] = S_TABLE.add_id(name=p[1])
+		p[0]['st_entry'] = S_TABLE.currentScope.add_id(name=p[1])
 	else:
 		p[0]['st_entry'] = st_entry
 
