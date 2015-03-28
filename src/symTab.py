@@ -6,7 +6,7 @@
 # 		self.type = undefined
 class Scope:
 	def __init__(self,parent):
-		self.EntryList = {'Integer':'typedef','Char':'typedef','String':'typedf'}
+		self.EntryList = {'Integer':'typedef','Char':'typedef','String':'typedef'}
 		self.num_entries = 0
 		self.parentScope = parent
 
@@ -21,7 +21,7 @@ class Scope:
 		scope = self
 		while(scope is not None):
 			if name in scope.EntryList:
-				return self.EntryList[name]
+				return scope.EntryList[name]
 			else:
 				scope = scope.parentScope
 		return None

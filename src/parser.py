@@ -28,12 +28,12 @@ def p_program_heading_2(p):
 def p_identifier_list_1(p):
 	'identifier_list :  identifier_list comma identifier'
 	p[0] = {}
-	p[0]['list_id'] = p[1]['list_id'].append(p[3]['st_entry'])
+	p[0]['list_id'] = p[1]['list_id'].append(p[3]['name'])
 
 def p_identifier_list_2(p):
 	'identifier_list :  identifier'
 	p[0] = {}
-	p[0]['list_id'] = [p[1]['st_entry']]
+	p[0]['list_id'] = [p[1]['name']]
 
 
 
@@ -491,32 +491,47 @@ def p_variable_declaration_list_2(p):
 def p_variable_declaration_1(p):
 	'variable_declaration :  identifier_list COLON type_denoter'
 	p[0] = {}
-	p[0]['type'] = p[3]['type']
-	for st_entry in p[1]['list_id']:
-		st_entry['type'] = p[3]['type']
+	for iden in p[1]['list_id']:
+		st_entry = S_TABLE.currentScope.look_up(name=iden)
+		if st_entry is not None:
+			throw_error("Variable re-declaration")
+			p[0]['type'] = 'ERROR'
+		else:
+			st_entry = S_TABLE.currentScope.add_id(name=iden)
+			S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['type']})
+			p[0]['type'] = 'VOID'
 
 
 def p_procedure_and_function_declaration_part_1(p):
 	'procedure_and_function_declaration_part :  procedure_declaration semicolon'
+	p[0] = p[1]
 
 def p_procedure_and_function_declaration_part_2(p):
 	'procedure_and_function_declaration_part :  function_declaration semicolon'
-
+	p[0] = p[1]
 
 
 def p_procedure_declaration_1(p):
 	'procedure_declaration :  procedure_heading semicolon directive'
+	p[0] = p[1]
 
 def p_procedure_declaration_2(p):
 	'procedure_declaration :  procedure_heading semicolon procedure_block'
+	p[0] = p[1]
 
 
 
 def p_procedure_heading_1(p):
 	'procedure_heading :  procedure_identification'
+	p[0] = p[1]
 
 def p_procedure_heading_2(p):
 	'procedure_heading :  procedure_identification formal_parameter_list'
+	p[0] = {}
+	if p[1]['type'] ==  'ERROR' or p[2]['type'] ==  'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
 
 
 
@@ -530,33 +545,44 @@ def p_directive_2(p):
 
 def p_formal_parameter_list_1(p):
 	'formal_parameter_list :  LPAREN formal_parameter_section_list RPAREN'
+	p[0] = p[2]
 
 
 
 def p_formal_parameter_section_list_1(p):
 	'formal_parameter_section_list :  formal_parameter_section_list semicolon formal_parameter_section'
+	p[0] = {}
+	if p[1]['type'] ==  'ERROR' or p[3]['type'] ==  'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
 
 def p_formal_parameter_section_list_2(p):
 	'formal_parameter_section_list :  formal_parameter_section'
-
+	p[0] = p[1]
 
 
 def p_formal_parameter_section_1(p):
 	'formal_parameter_section :  value_parameter_specification'
+	p[0] = p[1]
 
 def p_formal_parameter_section_2(p):
 	'formal_parameter_section :  variable_parameter_specification'
+	p[0] = p[1]
 
 def p_formal_parameter_section_3(p):
 	'formal_parameter_section :  procedural_parameter_specification'
+	p[0] = p[1]
 
 def p_formal_parameter_section_4(p):
 	'formal_parameter_section :  functional_parameter_specification'
+	p[0] = p[1]
 
 
 
 def p_value_parameter_specification_1(p):
-	'value_parameter_specification :  identifier_list COLON identifier'
+	'value_parameter_specification :  variable_declaration'
+	p[0] = p[1]
 
 
 
@@ -601,9 +627,42 @@ def p_function_declaration_3(p):
 
 def p_function_heading_1(p):
 	'function_heading :  f_begin_token identifier COLON result_type'
+	p[0] = {}
+
+	st_entry = S_TABLE.currentScope.look_up(name=p[2]['name'])
+	if st_entry is not None:
+		throw_error("Variable re-declaration")
+		p[0]['type'] = 'ERROR'
+	else:
+		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type']})
+		p[0]['type'] = 'VOID'
+	S_TABLE.begin_scope()
 
 def p_function_heading_2(p):
-	'function_heading :  f_begin_token identifier formal_parameter_list COLON result_type'
+	'function_heading :  f_begin_token identifier marker_fh formal_parameter_list COLON result_type'
+	p[0] = {}
+
+	p[3]['f_st_entry']['result_type'] = p[6]['type']
+	p[3]['f_st_entry']['type'] = 'function'
+	if p[3]['type'] == 'ERROR' :#or p[4]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else:
+		p[0]['type'] = 'VOID'
+
+
+def p_marker_fh_1(p):
+	'marker_fh :'
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name=p[-1]['name'])
+	if st_entry is not None:
+		throw_error("Variable re-declaration")
+		p[0]['type'] = 'ERROR'
+	else:
+		st_entry = S_TABLE.currentScope.add_id(name=p[-1]['name'])
+		p[0]['type'] = 'VOID'
+		p[0]['f_st_entry'] = st_entry
+	S_TABLE.begin_scope()
 
 
 def p_result_type_1(p):
@@ -620,18 +679,20 @@ def p_result_type_1(p):
 
 def p_function_identification_1(p):
 	'function_identification :  f_begin_token identifier'
-	p[0] = p[2]
+	p[0] = {}
+
 	st_entry = S_TABLE.currentScope.look_up(name=p[2]['name'])
-	if st_entry is None:
-		throw_error("Variable not declared")
-	elif 'type' not in st_entry:
-		throw_error("Variable not declared")
+	if st_entry is not None:
+		throw_error("Variable re-declaration")
+		p[0]['type'] = 'ERROR'
 	else:
-		p[0]['type'] = st_entry['type']
+		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type']})
+		p[0]['type'] = 'VOID'
+	S_TABLE.begin_scope()
 
 def p_f_begin_token_1(p):
 	'f_begin_token : RESERVED_FUNCTION'
-	S_TABLE.begin_scope()
 
 def p_function_block_1(p):
 	'function_block :  block'
@@ -830,7 +891,10 @@ def p_closed_if_statement_1(p):
 def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
 	p[0] = {}
-	p[1]['type'] = p[3]['type']
+	if (p[1]['type'] != p[3]['type']) and (p[3]['type'] != 'ERROR'):
+		p[0]['type'] = 'ERROR'
+		throw_error("type error during assignment")
+		return
 	if p[1]['type'] == 'ERROR' or p[3]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
 	else:
@@ -1222,11 +1286,11 @@ def p_identifier_1(p):
 	'identifier :  IDENTIFIER'
 	p[0] = {}
 	p[0]['name'] = p[1]
-	st_entry = S_TABLE.currentScope.look_up(name=p[1])
-	if st_entry is None:
-		p[0]['st_entry'] = S_TABLE.currentScope.add_id(name=p[1])
-	else:
-		p[0]['st_entry'] = st_entry
+	# st_entry = S_TABLE.currentScope.look_up(name=p[1])
+	# if st_entry is None:
+	# 	p[0]['st_entry'] = S_TABLE.currentScope.add_id(name=p[1])
+	# else:
+	# 	p[0]['st_entry'] = st_entry
 
 def p_identifier_2(p):
 	'identifier :  RESERVED_EXIT'
