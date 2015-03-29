@@ -5,10 +5,11 @@
 # 		self.size = -1
 # 		self.type = undefined
 class Scope:
-	def __init__(self,parent):
-		self.EntryList = {'Integer':'typedef','Char':'typedef','String':'typedef'}
+	def __init__(self,parent,name):
+		self.EntryList = {'integer':{'type':'typedef'},'char':{'type':'typedef'},'string':{'type':'typedef'}, 'boolean':{'type':'typedef'}} # include boolean, long , float etc.
 		self.num_entries = 0
 		self.parentScope = parent
+		self.name = name
 
 
 	def add_id(self,name):
@@ -41,10 +42,10 @@ class Scope:
 class SymTable:
 	"""Symbol Table data structure"""
 	def __init__(self):
-		self.currentScope = Scope(parent=None)
+		self.currentScope = Scope(parent=None,name='root')
 
-	def begin_scope(self):
-		self.currentScope = Scope(parent=self.currentScope)
+	def begin_scope(self,name):
+		self.currentScope = Scope(parent=self.currentScope,name=name)
 
 	def end_scope(self):
 		self.currentScope = self.currentScope.parentScope

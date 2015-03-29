@@ -1,0 +1,6 @@
+*	directive
+def p_function_declaration_1(p):
+	'function_declaration :  function_heading semicolon directive'
+
+
+*	

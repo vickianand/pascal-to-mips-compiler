@@ -1,6 +1,5 @@
 program fibonacci;
 
-
 function fib(n:integer): integer;
 begin
     if (n <= 2) then
@@ -11,7 +10,6 @@ end;
 
 var
     i:integer;
-
 
 begin
     for i := 1 to 16 do

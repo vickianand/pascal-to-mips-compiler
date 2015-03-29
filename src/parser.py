@@ -47,6 +47,7 @@ def p_block_1(p):
 
 def p_block_2(p):
 	'block :  statement_part'
+	p[0] = p[1]
 
 
 
@@ -259,7 +260,7 @@ def p_type_denoter_1(p):
 	'type_denoter :  identifier'
 	p[0] = {}
 	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
-	if st_entry != 'typedef':
+	if st_entry['type'] != 'typedef':
 		throw_error("Type not defined")
 	else:
 		p[0]['type'] = p[1]['name']
@@ -581,14 +582,42 @@ def p_formal_parameter_section_4(p):
 
 
 def p_value_parameter_specification_1(p):
-	'value_parameter_specification :  variable_declaration'
-	p[0] = p[1]
+	'value_parameter_specification :  identifier_list COLON identifier'
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name=p[3]['name'])
+	if st_entry['type'] != 'typedef':
+		throw_error("Type not defined")
+	else:
+		p[0]['type'] = 'VOID'
+	for iden in p[1]['list_id']:
+		st_entry = S_TABLE.currentScope.look_up(name=iden)
+		if st_entry is not None:
+			throw_error("Variable re-declaration")
+			p[0]['type'] = 'ERROR'
+		else:
+			st_entry = S_TABLE.currentScope.add_id(name=iden)
+			S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['name']})
+			p[0]['type'] = 'VOID'
 
 
 
 def p_variable_parameter_specification_1(p):
 	'variable_parameter_specification :  RESERVED_VAR identifier_list COLON identifier'
-
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name=p[4]['name'])
+	if st_entry['type'] != 'typedef':
+		throw_error("Type not defined")
+	else:
+		p[0]['type'] = 'VOID'
+	for iden in p[2]['list_id']:
+		st_entry = S_TABLE.currentScope.look_up(name=iden)
+		if st_entry is not None:
+			throw_error("Variable re-declaration")
+			p[0]['type'] = 'ERROR'
+		else:
+			st_entry = S_TABLE.currentScope.add_id(name=iden)
+			S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[4]['name']})
+			p[0]['type'] = 'VOID'
 
 
 def p_procedural_parameter_specification_1(p):
@@ -603,6 +632,17 @@ def p_functional_parameter_specification_1(p):
 
 def p_procedure_identification_1(p):
 	'procedure_identification :  RESERVED_PROCEDURE identifier'
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name=p[2]['name'])
+	if st_entry is not None:
+		throw_error("Variable re-declaration")
+		p[0]['type'] = 'ERROR'
+	else :
+		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'procedure'})
+		p[0]['type'] = 'VOID'
+		S_TABLE.begin_scope(name=p[2]['name'])
+
 
 
 
@@ -618,15 +658,23 @@ def p_function_declaration_1(p):
 def p_function_declaration_2(p):
 	'function_declaration :  function_identification semicolon function_block'
 	S_TABLE.end_scope()
+	if p[1]['type'] == p[1]['type'] == 'VOID' :
+		p[0] = {'type' : 'VOID'}
+	else :
+		p[0] = {'type' : 'ERROR'}
 
 def p_function_declaration_3(p):
 	'function_declaration :  function_heading semicolon function_block'
 	S_TABLE.end_scope()
+	if p[1]['type'] == p[1]['type'] == 'VOID' :
+		p[0] = {'type' : 'VOID'}
+	else :
+		p[0] = {'type' : 'ERROR'}
 
 
 
 def p_function_heading_1(p):
-	'function_heading :  f_begin_token identifier COLON result_type'
+	'function_heading :  RESERVED_FUNCTION identifier COLON result_type'
 	p[0] = {}
 
 	st_entry = S_TABLE.currentScope.look_up(name=p[2]['name'])
@@ -637,18 +685,22 @@ def p_function_heading_1(p):
 		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
 		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type']})
 		p[0]['type'] = 'VOID'
-	S_TABLE.begin_scope()
+		S_TABLE.begin_scope(name=p[2]['name'])
 
 def p_function_heading_2(p):
-	'function_heading :  f_begin_token identifier marker_fh formal_parameter_list COLON result_type'
+	'function_heading :  RESERVED_FUNCTION identifier marker_fh formal_parameter_list COLON result_type'
 	p[0] = {}
 
 	p[3]['f_st_entry']['result_type'] = p[6]['type']
 	p[3]['f_st_entry']['type'] = 'function'
-	if p[3]['type'] == 'ERROR' :#or p[4]['type'] == 'ERROR':
+
+	if p[6]['type'] == 'ERROR' :
 		p[0]['type'] = 'ERROR'
-	else:
+		return
+	if p[3]['type'] == p[4]['type'] == 'VOID' :
 		p[0]['type'] = 'VOID'
+	else:
+		p[0]['type'] = 'ERROR'
 
 
 def p_marker_fh_1(p):
@@ -662,15 +714,16 @@ def p_marker_fh_1(p):
 		st_entry = S_TABLE.currentScope.add_id(name=p[-1]['name'])
 		p[0]['type'] = 'VOID'
 		p[0]['f_st_entry'] = st_entry
-	S_TABLE.begin_scope()
+		S_TABLE.begin_scope(name=p[-1]['name'])
 
 
 def p_result_type_1(p):
 	'result_type :  identifier'
 	p[0] = {}
 	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
-	if st_entry != 'typedef':
+	if st_entry['type'] != 'typedef':
 		throw_error("Type not defined")
+		p[0]['type'] = 'ERROR'
 	else:
 		p[0]['type'] = p[1]['name']
 
@@ -678,7 +731,7 @@ def p_result_type_1(p):
 
 
 def p_function_identification_1(p):
-	'function_identification :  f_begin_token identifier'
+	'function_identification :  RESERVED_FUNCTION identifier'
 	p[0] = {}
 
 	st_entry = S_TABLE.currentScope.look_up(name=p[2]['name'])
@@ -687,15 +740,14 @@ def p_function_identification_1(p):
 		p[0]['type'] = 'ERROR'
 	else:
 		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
-		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type']})
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type': 'VOID'})
 		p[0]['type'] = 'VOID'
-	S_TABLE.begin_scope()
+		S_TABLE.begin_scope(name=p[2]['name'])
 
-def p_f_begin_token_1(p):
-	'f_begin_token : RESERVED_FUNCTION'
 
 def p_function_block_1(p):
 	'function_block :  block'
+	p[0] = p[1]
 
 
 
@@ -857,13 +909,32 @@ def p_closed_while_statement_1(p):
 
 def p_open_for_statement_1(p):
 	'open_for_statement :  RESERVED_FOR control_variable ASSIGNMENT initial_value direction   final_value RESERVED_DO open_statement'
-
+	p[0] = {}
+	if p[2]['type'] == p[4]['type'] == p[6]['type'] :
+		if p[2]['type'].lower() == 'integer' or p[2]['type'].lower() == 'longint' or p[2]['type'].lower() == 'shortint' :
+			if p[8]['type'] == 'VOID' :
+				p[0]['type'] = 'VOID'
+				return
+		else :
+			throw_error('ERROR: control variables in for loop should be integer type')
+	else:
+		throw_error('type mismatch amongst control variables of for-loop')
+	p[0]['type'] = 'ERROR'
 
 
 def p_closed_for_statement_1(p):
 	'closed_for_statement :  RESERVED_FOR control_variable ASSIGNMENT initial_value direction   final_value RESERVED_DO closed_statement'
-
-
+	p[0] = {}
+	if p[2]['type'] == p[4]['type'] == p[6]['type'] :
+		if p[2]['type'].lower() == 'integer' or p[2]['type'].lower() == 'longint' or p[2]['type'].lower() == 'shortint' :
+			if p[8]['type'] == 'VOID' :
+				p[0]['type'] = 'VOID'
+				return
+		else :
+			throw_error('ERROR: control variables in for loop should be integer type')
+	else:
+		throw_error('type mismatch amongst control variables of for-loop')
+	p[0]['type'] = 'ERROR'
 
 def p_open_with_statement_1(p):
 	'open_with_statement :  RESERVED_WITH record_variable_list RESERVED_DO open_statement'
@@ -877,26 +948,51 @@ def p_closed_with_statement_1(p):
 
 def p_open_if_statement_1(p):
 	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN statement'
+	p[0] = {}
+	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
 
 def p_open_if_statement_2(p):
 	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN closed_statement RESERVED_ELSE open_statement'
-
+	p[0] = {}
+	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR' or p[6]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
 
 
 def p_closed_if_statement_1(p):
 	'closed_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN closed_statement   RESERVED_ELSE closed_statement'
-
+	p[0] = {}
+	# if(debugger):
+	# 	print "debugging: for closed_if_statement_1	"
+	# 	print "p_2_type: "+p[2]['type']
+	# 	print "p_4_type: "+p[4]['type']
+	# 	print "p_6_type: "+p[6]['type']
+	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR' or p[6]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
 
 
 def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
 	p[0] = {}
-	if (p[1]['type'] != p[3]['type']) and (p[3]['type'] != 'ERROR'):
-		p[0]['type'] = 'ERROR'
-		throw_error("type error during assignment")
-		return
+	# if(debugger):
+	# 	print "DEBUGGING: at top of p_assignment_statement_1"
+	# 	print "p_1_type: "+p[1]['type']
+	# 	print "p_1_type: "+p[3]['type']
+	if p[1]['type'] == 'function':
+		p[1]['type'] = p[1]['result_type'] 
+
 	if p[1]['type'] == 'ERROR' or p[3]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
+		return
+	if (p[1]['type'] != p[3]['type']) :
+		p[0]['type'] = 'ERROR'
+		throw_error("type error during assignment")
 	else:
 		p[0]['type'] = 'VOID'
 
@@ -907,9 +1003,12 @@ def p_variable_access_1(p):
 	p[0] = p[1]
 	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
 	if st_entry is None:
+		p[0]['type'] = 'ERROR'
 		throw_error("Variable not declared")
-	elif 'type' not in st_entry:
-		throw_error("Variable not declared")
+	elif st_entry['type'] == 'function':
+		p[0]['result_type'] = st_entry['result_type']
+		p[0]['type'] = st_entry['type']
+		# throw_error("Variable not declared")
 	else:
 		p[0]['type'] = st_entry['type']
 
@@ -950,6 +1049,23 @@ def p_field_designator_1(p):
 
 def p_procedure_statement_1(p):
 	'procedure_statement :  identifier params'
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
+	if st_entry == None:
+		throw_error('undeclared function/procedure used')
+		p[0]['type'] = 'ERROR'
+		return
+	elif st_entry['type'] != 'procedure':
+		throw_error('this identifier cannot be used as a function or procedure')
+		p[0]['type'] = 'ERROR'
+		return
+	else:
+		p[1]['type'] = 'VOID'
+
+	if p[1]['type'] == 'ERROR' or p[2]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
 
 def p_procedure_statement_2(p):
 	'procedure_statement :  identifier'
@@ -958,19 +1074,32 @@ def p_procedure_statement_2(p):
 
 def p_params_1(p):
 	'params :  LPAREN actual_parameter_list RPAREN'
+	p[0] = p[2]
+
 
 
 
 def p_actual_parameter_list_1(p):
 	'actual_parameter_list :  actual_parameter_list comma actual_parameter'
+	p[0] = {}
+	p[0]['list'] = p[1]['list'].append(p[3])
+	if p[1]['type'] == 'ERROR' or p[3]['type'] == 'ERROR' :
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
+
 
 def p_actual_parameter_list_2(p):
 	'actual_parameter_list :  actual_parameter'
+	p[0] = {}
+	p[0]['list'] = [p[1]]
+	p[0]['type'] = p[1]['type']
 
 
 
 def p_actual_parameter_1(p):
 	'actual_parameter :  expression'
+	p[0] = p[1]
 
 def p_actual_parameter_2(p):
 	'actual_parameter :  expression COLON expression'
@@ -1027,12 +1156,18 @@ def p_otherwisepart_2(p):
 
 def p_control_variable_1(p):
 	'control_variable :  identifier'
-
-
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name = p[1]['name'])
+	if st_entry == None:
+		throw_error('control variable not declared')
+		p[0]['type'] = 'ERROR'
+		return
+	else :
+		p[0]['type'] = st_entry['type']
 
 def p_initial_value_1(p):
 	'initial_value :  expression'
-
+	p[0] = p[1]
 
 
 def p_direction_1(p):
@@ -1045,6 +1180,7 @@ def p_direction_2(p):
 
 def p_final_value_1(p):
 	'final_value :  expression'
+	p[0] = p[1]
 
 
 
@@ -1058,7 +1194,10 @@ def p_record_variable_list_2(p):
 
 def p_boolean_expression_1(p):
 	'boolean_expression :  expression'
-
+	# if(debugger):
+	# 	print "DEBUGGING: p_boolean_expression_1"
+	# 	print "p_1_type : "+ p[1]['type']
+	p[0] = p[1]
 
 
 def p_expression_1(p):
@@ -1067,6 +1206,20 @@ def p_expression_1(p):
 
 def p_expression_2(p):
 	'expression :  simple_expression relop simple_expression'
+	# if(debugger):
+	# 	print "DEBUGGING: p_expression_2"
+	# 	print "p_1_type, p_3_type : "+p[1]['type']+"  "+p[3]['type']
+	p[0] = {}
+	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint' or p[1]['type'] == 'boolean' or p[1]['type'] == 'real':
+		if p[3]['type'] == 'integer' or p[3]['type'] == 'longint' or p[3]['type'] == 'boolean' or p[3]['type'] == 'real':
+			p[0]['type'] = 'boolean'
+			return
+	p[0]['type'] = 'ERROR'
+	throw_error('Invalid types comparison with relational operator')
+	# if(debugger):
+	# 	print "DEBUGGING: at the end of p_expression_2"
+	# 	print "p_0_type : "+p[0]['type']
+
 
 
 
@@ -1077,15 +1230,15 @@ def p_simple_expression_1(p):
 def p_simple_expression_2(p):
 	'simple_expression :  simple_expression addop term' 
 	p[0] = {}
-	if p[1]['type'] == 'Integer' :
-		if p[3]['type'] == 'REAL' or p[3]['type'] == 'Integer':
+	if p[1]['type'] == 'integer' :
+		if p[3]['type'] == 'real' or p[3]['type'] == 'integer':
 			p[0]['type'] = p[3]['type']
 		else:
 			throw_error("type mismatch")
 			p[0]['type'] = 'ERROR'
-	elif p[1]['type'] == 'REAL':
-		if p[3]['type'] == 'REAL' or p[3]['type'] == 'Integer':
-			p[0]['type'] = 'REAL'
+	elif p[1]['type'] == 'real':
+		if p[3]['type'] == 'real' or p[3]['type'] == 'integer':
+			p[0]['type'] = 'real'
 		else:
 			throw_error("type mismatch")
 			p[0]['type'] = 'ERROR'
@@ -1105,6 +1258,23 @@ def p_term_1(p):
 
 def p_term_2(p):
 	'term :  term mulop factor'
+	p[0] = {}
+	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint':
+		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint':
+			p[0]['type'] = p[3]['type']
+		else:
+			throw_error("type mismatch between two operands of mulop")
+			p[0]['type'] = 'ERROR'
+	elif p[1]['type'] == 'real':
+		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint':
+			p[0]['type'] = 'real'
+		else:
+			throw_error("type mismatch between two operands of mulop")
+			p[0]['type'] = 'ERROR'
+	else:
+		throw_error("type mismatch between two operands of mulop")
+		return
+
 
 
 
@@ -1139,12 +1309,14 @@ def p_primary_3(p):
 	'primary :  function_designator'
 	p[0] = p[1]
 
+
 def p_primary_4(p):
 	'primary :  set_constructor'
 	p[0] = p[1]
 
 def p_primary_5(p):
 	'primary :  LPAREN expression RPAREN'
+	p[0] = p[2]
 
 def p_primary_6(p):
 	'primary :  RESERVED_NOT primary'
@@ -1175,7 +1347,7 @@ def p_unsigned_number_2(p):
 
 def p_unsigned_integer_1(p):
 	'unsigned_integer :  DIGITSEQ'
-	p[0] = {'value':p[1],'type':'Integer'}
+	p[0] = {'value':p[1],'type':'integer'}
 
 
 def p_unsigned_real_1(p):
@@ -1186,6 +1358,15 @@ def p_unsigned_real_1(p):
 
 def p_function_designator_1(p):
 	'function_designator :  identifier params'
+	st_entry = S_TABLE.currentScope.look_up(name = p[1]['name'])
+	if(st_entry == None) :
+		throw_error("function yet not defined")
+		p[0] = {'type' : 'ERROR'}
+	elif st_entry['type'] != 'function' :
+		throw_error('this identifier cannot be used as a function ')
+		p[0] = {'type' : 'ERROR'}
+	else :
+		p[0] = {'type' : st_entry['result_type']}
 
 
 
@@ -1285,7 +1466,7 @@ def p_relop_7(p):
 def p_identifier_1(p):
 	'identifier :  IDENTIFIER'
 	p[0] = {}
-	p[0]['name'] = p[1]
+	p[0]['name'] = p[1].lower()
 	# st_entry = S_TABLE.currentScope.look_up(name=p[1])
 	# if st_entry is None:
 	# 	p[0]['st_entry'] = S_TABLE.currentScope.add_id(name=p[1])
@@ -1344,5 +1525,6 @@ def testYacc(inputFile):
 if __name__ == "__main__":
     from sys import argv
     filename, inputFile = argv
+    debugger = True
     S_TABLE = symTab.SymTable()
     testYacc(inputFile)
