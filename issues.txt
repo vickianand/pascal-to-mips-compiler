@@ -1,3 +1,6 @@
 AMP removed.
 true -> digitseq 1
 false -> digitseq 0
+
+Write if-else for boolean(relop) evaluation.
+Extend closed_if to other similar cases.

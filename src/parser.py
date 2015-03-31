@@ -948,7 +948,7 @@ def p_closed_with_statement_1(p):
 
 
 def p_open_if_statement_1(p):
-	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN statement'
+	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching statement'
 	p[0] = {}
 	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
@@ -956,7 +956,7 @@ def p_open_if_statement_1(p):
 		p[0]['type'] = 'VOID'
 
 def p_open_if_statement_2(p):
-	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN closed_statement RESERVED_ELSE open_statement'
+	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching closed_statement RESERVED_ELSE open_statement'
 	p[0] = {}
 	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR' or p[6]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
@@ -965,19 +965,28 @@ def p_open_if_statement_2(p):
 
 
 def p_closed_if_statement_1(p):
-	'closed_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN closed_statement   RESERVED_ELSE marker_if_false_closed closed_statement'
+	'closed_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching closed_statement RESERVED_ELSE marker_if_false_closed closed_statement'
 	p[0] = {}
-	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR' or p[6]['type'] == 'ERROR':
+	if p[2]['type'] == 'ERROR' or p[5]['type'] == 'ERROR' or p[5]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
 	else :
 		p[0]['type'] = 'VOID'
-		TAC.emit(p[6]['t_name'],p[2]['t_name'],'','IF_FALSE_GOTO')
+		TAC.emit(p[7]['if_end'],'','','label')
 
-def p_marker_if_true_closed_1(p):
+
+def p_marker_if_false_closed_1(p):
 	'marker_if_false_closed :'
 	p[0] = {}
-	p[0]['t_name'] = S_TABLE.new_label()
+	p[0]['t_name'] = p[-5]['false']
+	p[0]['if_end'] = S_TABLE.new_label()
+	TAC.emit(p[0]['if_end'],'','','GOTO')
 	TAC.emit(p[0]['t_name'],'','','label')
+
+def p_marker_for_branching_1(p):
+	'marker_for_branching :'
+	p[0] = {}
+	TAC.emit(p[-2]['false'],p[-2]['t_name'],'','IF_FALSE_GOTO')
+
 
 def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
@@ -1201,11 +1210,14 @@ def p_boolean_expression_1(p):
 	# if(debugger):
 	# 	print "DEBUGGING: p_boolean_expression_1"
 	# 	print "p_1_type : "+ p[1]['type']
+	p[0] = {}
 	if p[1]['type'] != 'boolean' and p[1]['type'] != 'ERROR':
 		throw_error("condition in 'if' is not boolean")
 		p[0]['type'] == 'ERROR'
 	else : 
 		p[0] = p[1]
+		p[0]['true'] = S_TABLE.new_label()
+		p[0]['false'] = S_TABLE.new_label()
 
 
 def p_expression_1(p):

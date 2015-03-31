@@ -12,6 +12,9 @@ class ThreeAddrCode:
 		self.code[curr_func].append([dest,src1,src2,op])
 
 	def print_TAC(self):
-		print self.code
+		for t in self.code:
+			print t
+			for c in self.code[t]:
+				print c
 		
 		

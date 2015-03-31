@@ -2,10 +2,11 @@ program abc;
 var
     i:integer;
     j:integer;
-    k:boolean;
 begin
 	i := 5;
 	j := 10;
-    i := i + j;
-    k := i < 5;
+    if (i < 5) then
+     	j := 5
+    else 
+    	i := 10;
 end.
