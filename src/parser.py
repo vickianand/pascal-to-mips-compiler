@@ -1,6 +1,7 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
 import symTab
+import threeAddrCode
 
 def p_file_1(p):
 	'file :  program'
@@ -499,7 +500,7 @@ def p_variable_declaration_1(p):
 			p[0]['type'] = 'ERROR'
 		else:
 			st_entry = S_TABLE.currentScope.add_id(name=iden)
-			S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['type']})
+			S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['type'],'t_name':S_TABLE.new_temp()})
 			p[0]['type'] = 'VOID'
 
 
@@ -964,18 +965,19 @@ def p_open_if_statement_2(p):
 
 
 def p_closed_if_statement_1(p):
-	'closed_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN closed_statement   RESERVED_ELSE closed_statement'
+	'closed_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN closed_statement   RESERVED_ELSE marker_if_false_closed closed_statement'
 	p[0] = {}
-	# if(debugger):
-	# 	print "debugging: for closed_if_statement_1	"
-	# 	print "p_2_type: "+p[2]['type']
-	# 	print "p_4_type: "+p[4]['type']
-	# 	print "p_6_type: "+p[6]['type']
 	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR' or p[6]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
 	else :
 		p[0]['type'] = 'VOID'
+		TAC.emit(p[6]['t_name'],p[2]['t_name'],'','IF_FALSE_GOTO')
 
+def p_marker_if_true_closed_1(p):
+	'marker_if_false_closed :'
+	p[0] = {}
+	p[0]['t_name'] = S_TABLE.new_label()
+	TAC.emit(p[0]['t_name'],'','','label')
 
 def p_assignment_statement_1(p):
 	'assignment_statement :  variable_access ASSIGNMENT expression'
@@ -986,7 +988,6 @@ def p_assignment_statement_1(p):
 	# 	print "p_1_type: "+p[3]['type']
 	if p[1]['type'] == 'function':
 		p[1]['type'] = p[1]['result_type'] 
-
 	if p[1]['type'] == 'ERROR' or p[3]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
 		return
@@ -995,6 +996,7 @@ def p_assignment_statement_1(p):
 		throw_error("type error during assignment")
 	else:
 		p[0]['type'] = 'VOID'
+		TAC.emit(p[1]['t_name'],p[3]['t_name'],'',p[2])
 
 
 
@@ -1011,6 +1013,7 @@ def p_variable_access_1(p):
 		# throw_error("Variable not declared")
 	else:
 		p[0]['type'] = st_entry['type']
+		p[0]['t_name'] = st_entry['t_name']
 
 
 def p_variable_access_2(p):
@@ -1164,6 +1167,7 @@ def p_control_variable_1(p):
 		return
 	else :
 		p[0]['type'] = st_entry['type']
+		p[0]['t_name'] = st_entry['t_name']
 
 def p_initial_value_1(p):
 	'initial_value :  expression'
@@ -1197,7 +1201,11 @@ def p_boolean_expression_1(p):
 	# if(debugger):
 	# 	print "DEBUGGING: p_boolean_expression_1"
 	# 	print "p_1_type : "+ p[1]['type']
-	p[0] = p[1]
+	if p[1]['type'] != 'boolean' and p[1]['type'] != 'ERROR':
+		throw_error("condition in 'if' is not boolean")
+		p[0]['type'] == 'ERROR'
+	else : 
+		p[0] = p[1]
 
 
 def p_expression_1(p):
@@ -1213,6 +1221,8 @@ def p_expression_2(p):
 	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint' or p[1]['type'] == 'boolean' or p[1]['type'] == 'real':
 		if p[3]['type'] == 'integer' or p[3]['type'] == 'longint' or p[3]['type'] == 'boolean' or p[3]['type'] == 'real':
 			p[0]['type'] = 'boolean'
+			p[0]['t_name'] = S_TABLE.new_temp()
+			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
 			return
 	p[0]['type'] = 'ERROR'
 	throw_error('Invalid types comparison with relational operator')
@@ -1233,12 +1243,16 @@ def p_simple_expression_2(p):
 	if p[1]['type'] == 'integer' :
 		if p[3]['type'] == 'real' or p[3]['type'] == 'integer':
 			p[0]['type'] = p[3]['type']
+			p[0]['t_name'] = S_TABLE.new_temp()
+			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
 		else:
 			throw_error("type mismatch")
 			p[0]['type'] = 'ERROR'
 	elif p[1]['type'] == 'real':
 		if p[3]['type'] == 'real' or p[3]['type'] == 'integer':
 			p[0]['type'] = 'real'
+			p[0]['t_name'] = S_TABLE.new_temp()
+			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
 		else:
 			throw_error("type mismatch")
 			p[0]['type'] = 'ERROR'
@@ -1262,12 +1276,16 @@ def p_term_2(p):
 	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint':
 		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint':
 			p[0]['type'] = p[3]['type']
+			p[0]['t_name'] = S_TABLE.new_temp()
+			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
 		else:
 			throw_error("type mismatch between two operands of mulop")
 			p[0]['type'] = 'ERROR'
 	elif p[1]['type'] == 'real':
 		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint':
 			p[0]['type'] = 'real'
+			p[0]['t_name'] = S_TABLE.new_temp()
+			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
 		else:
 			throw_error("type mismatch between two operands of mulop")
 			p[0]['type'] = 'ERROR'
@@ -1280,7 +1298,9 @@ def p_term_2(p):
 
 def p_factor_1(p):
 	'factor :  sign factor'
-
+	p[0] = p[2]
+	p[0]['t_name'] = S_TABLE.new_temp()
+	TAC.emit(p[0]['t_name'],p[2]['t_name'],'',p[1])
 
 def p_factor_2(p):
 	'factor :  exponentiation'
@@ -1326,14 +1346,20 @@ def p_primary_6(p):
 def p_unsigned_constant_1(p):
 	'unsigned_constant :  unsigned_number'
 	p[0] = p[1]
+	p[0]['t_name'] = S_TABLE.new_temp()
+	TAC.emit(p[0]['t_name'],p[1]['value'],'',':=')
 
 def p_unsigned_constant_2(p):
 	'unsigned_constant :  STRING'
 	p[0] = {'value':p[1],'type':'STRING'}
+	p[0]['t_name'] = S_TABLE.new_temp()
+	TAC.emit(p[0]['t_name'],p[1]['value'],'',':=')
 
 def p_unsigned_constant_3(p):
 	'unsigned_constant :  RESERVED_NIL'
 	p[0] = {'value':None,'type':'NIL'}
+	p[0]['t_name'] = S_TABLE.new_temp()
+	TAC.emit(p[0]['t_name'],p[1]['value'],'',':=')
 
 
 def p_unsigned_number_1(p):
@@ -1352,7 +1378,7 @@ def p_unsigned_integer_1(p):
 
 def p_unsigned_real_1(p):
 	'unsigned_real :  REALNUMBER'
-	p[0] = {'value':p[1],'type':'REAL'}
+	p[0] = {'value':p[1],'type':'real'}
 
 
 
@@ -1467,16 +1493,12 @@ def p_identifier_1(p):
 	'identifier :  IDENTIFIER'
 	p[0] = {}
 	p[0]['name'] = p[1].lower()
-	# st_entry = S_TABLE.currentScope.look_up(name=p[1])
-	# if st_entry is None:
-	# 	p[0]['st_entry'] = S_TABLE.currentScope.add_id(name=p[1])
-	# else:
-	# 	p[0]['st_entry'] = st_entry
 
 def p_identifier_2(p):
 	'identifier :  RESERVED_EXIT'
 	p[0] = {}
 	p[0]['name'] = p[1]
+	# TAC.emit('','','','exit')
 
 def p_identifier_3(p):
 	'identifier :  RESERVED_STRING'
@@ -1527,4 +1549,6 @@ if __name__ == "__main__":
     filename, inputFile = argv
     debugger = True
     S_TABLE = symTab.SymTable()
+    TAC = threeAddrCode.ThreeAddrCode(S_TABLE)
     testYacc(inputFile)
+    TAC.print_TAC()
