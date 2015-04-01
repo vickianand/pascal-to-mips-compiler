@@ -1444,7 +1444,7 @@ def p_unsigned_constant_1(p):
 
 def p_unsigned_constant_2(p):
 	'unsigned_constant :  STRING'
-	p[0] = {'value':p[1],'type':'STRING'}
+	p[0] = {'value':p[1],'type':'string'}
 	p[0]['t_name'] = S_TABLE.new_temp()
 	TAC.emit(p[0]['t_name'],p[1],'',':=')	# issue: how to get the exact string value ??
 
