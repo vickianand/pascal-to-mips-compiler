@@ -6,7 +6,11 @@
 # 		self.type = undefined
 class Scope:
 	def __init__(self,parent,name):
-		self.EntryList = {'integer':{'type':'typedef'},'char':{'type':'typedef'},'string':{'type':'typedef'}, 'boolean':{'type':'typedef'}} # include boolean, long , float etc.
+		self.EntryList = {'integer':{'type':'typedef', 'width': 4},
+							'real':{'type':'typedef', 'width': 4},
+							'char':{'type':'typedef', 'width': 1},
+							'string':{'type':'typedef', 'width': 4} 
+						} # include boolean, long , float etc.
 		self.num_entries = 0
 		self.parentScope = parent
 		self.name = name

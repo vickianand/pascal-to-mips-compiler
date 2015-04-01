@@ -29,7 +29,7 @@ def p_program_heading_2(p):
 def p_identifier_list_1(p):
 	'identifier_list :  identifier_list comma identifier'
 	p[0] = {}
-	p[0]['list_id'] = p[1]['list_id'].append(p[3]['name'])
+	p[0]['list_id'] = p[1]['list_id'] + [p[3]['name']]
 
 def p_identifier_list_2(p):
 	'identifier_list :  identifier'
@@ -235,10 +235,11 @@ def p_constant_3(p):
 
 def p_sign_1(p):
 	'sign :  PLUS'
+	p[0] = {'name': p[1]}
 
 def p_sign_2(p):
 	'sign :  MINUS'
-
+	p[0] = {'name' : p[1]}
 
 
 def p_non_string_1(p):
@@ -1014,7 +1015,7 @@ def p_closed_with_statement_1(p):
 def p_open_if_statement_1(p):
 	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching statement'
 	p[0] = {}
-	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR':
+	if p[2]['type'] == 'ERROR' or p[5]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
 	else :
 		p[0]['type'] = 'VOID'
@@ -1292,22 +1293,17 @@ def p_expression_1(p):
 
 def p_expression_2(p):
 	'expression :  simple_expression relop simple_expression'
-	# if(debugger):
-	# 	print "DEBUGGING: p_expression_2"
-	# 	print "p_1_type, p_3_type : "+p[1]['type']+"  "+p[3]['type']
 	p[0] = {}
-	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint' or p[1]['type'] == 'boolean' or p[1]['type'] == 'real':
-		if p[3]['type'] == 'integer' or p[3]['type'] == 'longint' or p[3]['type'] == 'boolean' or p[3]['type'] == 'real':
-			p[0]['type'] = 'boolean'
-			p[0]['t_name'] = S_TABLE.new_temp()
-			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
-			return
-	p[0]['type'] = 'ERROR'
-	throw_error('Invalid types comparison with relational operator')
-	# if(debugger):
-	# 	print "DEBUGGING: at the end of p_expression_2"
-	# 	print "p_0_type : "+p[0]['type']
-
+	p[0]['t_name'] = S_TABLE.new_temp()
+	# issue: I am not sure what all types are compatible with different types of operands
+	if p[1]['type'] == 'string' or p[3]['type'] == 'string' :
+		error_st = "string type cannot be used with "+p[3]['name']+" relational-operator"
+		throw_error(error_st)
+	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'real'+p[2]['name'])
+	else :
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
+	p[0]['type'] = 'integer' 	# for us integer is boolean
 
 
 
@@ -1318,27 +1314,24 @@ def p_simple_expression_1(p):
 def p_simple_expression_2(p):
 	'simple_expression :  simple_expression addop term' 
 	p[0] = {}
-	if p[1]['type'] == 'integer' :
-		if p[3]['type'] == 'real' or p[3]['type'] == 'integer':
-			p[0]['type'] = p[3]['type']
-			p[0]['t_name'] = S_TABLE.new_temp()
-			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
-		else:
-			throw_error("type mismatch")
-			p[0]['type'] = 'ERROR'
-	elif p[1]['type'] == 'real':
-		if p[3]['type'] == 'real' or p[3]['type'] == 'integer':
-			p[0]['type'] = 'real'
-			p[0]['t_name'] = S_TABLE.new_temp()
-			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
-		else:
-			throw_error("type mismatch")
-			p[0]['type'] = 'ERROR'
-	else:
-		throw_error("type mismatch")
+	p[0]['t_name'] = S_TABLE.new_temp()
+	if p[1]['type'] == 'string' or p[3]['type'] == 'string' :
+		error_st = "string type cannot be used with "+p[3]['name']+" addop-operator"
+		throw_error(error_st)
 		return
-
-
+	elif p[2]['name'] == 'or' or p[2]['name'] == 'xor' :	# if its safe to proceed and operator is 'OR' or 'XOR'
+		p[0]['type'] = 'integer'	# then output type must be integer(boolean)
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
+	# for other operators we are going to type-cast it into the largest-sized data-type .
+	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
+		p[0]['type'] = 'real'					# real is a larger data-type
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'real'+p[2]['name'])
+	elif p[1]['type'] == 'integer' or p[3]['type'] == 'integer' :
+		p[0]['type'] = 'integer'					# integer is a larger data-type
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
+	else :
+		p[0]['type'] = 'char'					# char is only left data-type	
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'char'+p[2]['name'])
 
 
 
@@ -1351,34 +1344,45 @@ def p_term_1(p):
 def p_term_2(p):
 	'term :  term mulop factor'
 	p[0] = {}
-	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint' or p[1]['type'] == 'boolean':
-		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint' or p[1]['type'] == 'boolean':
-			p[0]['type'] = p[3]['type']
-			p[0]['t_name'] = S_TABLE.new_temp()
-			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
-		else:
-			throw_error("type mismatch between two operands of mulop")
-			p[0]['type'] = 'ERROR'
-	elif p[1]['type'] == 'real':
-		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint':
-			p[0]['type'] = 'real'
-			p[0]['t_name'] = S_TABLE.new_temp()
-			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
-		else:
-			throw_error("type mismatch between two operands of mulop")
-			p[0]['type'] = 'ERROR'
-	else:
-		throw_error("type mismatch between two operands of mulop")
+	p[0]['t_name'] = S_TABLE.new_temp()
+	if p[1]['type'] == 'string' or p[3]['type'] == 'string' :
+		error_st = "string type cannot be used with "+p[3]['name']+" mulop-operator"
+		throw_error(error_st)
 		return
+	elif p[2]['name'] == 'and' :	# if its safe to proceed and operator is 'AND'
+		p[0]['type'] = 'integer'	# then output type must be integer(boolean)
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
+	# for other operators we are going to type-cast it into the largest-sized data-type .
+	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
+		p[0]['type'] = 'real'					# real is a larger data-type
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'real'+p[2]['name'])
+	elif p[1]['type'] == 'integer' or p[3]['type'] == 'integer' :
+		p[0]['type'] = 'integer'					# integer is a larger data-type
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
+	else :
+		p[0]['type'] = 'char'					# char is only left data-type	
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'char'+p[2]['name'])
+
 
 
 
 
 def p_factor_1(p):
 	'factor :  sign factor'
-	p[0] = p[2]
+	p[0] = {}
 	p[0]['t_name'] = S_TABLE.new_temp()
-	TAC.emit(p[0]['t_name'],p[2]['t_name'],'',p[1])
+	# p[0]['t_name'] = S_TABLE.new_temp()
+	if p[2]['type'] == 'string' :
+		throw_error('string type can\'t be used with unary operators')
+		p[0]['type'] = 'ERROR'
+	elif p[2]['type'] == 'char' :
+		p[0]['type'] = 'integer'	# automatic type casting done
+									# issue: how to change the width while type-casting
+		TAC.emit(p[0]['t_name'],0,p[2]['t_name'],p[1]['name'])		# implementing unary operators by substracting it from 0
+	else:
+		p[0]['type'] = p[2]['type']
+		TAC.emit(p[0]['t_name'],0,p[2]['t_name'],p[1]['name'])		# implementing unary operators by substracting it from 0
+		
 
 def p_factor_2(p):
 	'factor :  exponentiation'
@@ -1391,7 +1395,14 @@ def p_exponentiation_1(p):
 
 def p_exponentiation_2(p):
 	'exponentiation :  primary POWER exponentiation'
-
+	p[0] = {}
+	p[0]['t_name'] = S_TABLE.new_temp()
+	if p[1]['type'] == 'string' or p[3]['type'] != 'integer' :
+		throw_error('incompatible operand-types used with POWER(\'**\') operator')
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = p[1]['type']
+		TAC.emit(p[0]['t_name'], p[1]['t_name'], p[3]['t_name'], 'POWER')
 
 
 
@@ -1407,17 +1418,21 @@ def p_primary_3(p):
 	'primary :  function_designator'
 	p[0] = p[1]
 
-
-def p_primary_4(p):
-	'primary :  set_constructor'
-	p[0] = p[1]
+# def p_primary_4(p):
+# 	'primary :  set_constructor'
+# 	p[0] = p[1]
 
 def p_primary_5(p):
-	'primary :  LPAREN expression RPAREN'
+	'primary :  LPAREN expression RPAREN'	# if its bracketd, it surpasses all the precedence of operators
 	p[0] = p[2]
 
 def p_primary_6(p):
-	'primary :  RESERVED_NOT primary'
+	'primary :  RESERVED_NOT primary'		# not has a very high precedence
+	p[0] = {}
+	p[0]['t_name'] = S_TABLE.new_temp()
+	p[0]['type'] = 'integer'				# we are not keeping boolean type specifically. Integer type will do the job of boolean type
+	TAC.emit(p[0]['t_name'], p[2]['t_name'], '', 'NOT')
+
 
 
 
@@ -1431,13 +1446,13 @@ def p_unsigned_constant_2(p):
 	'unsigned_constant :  STRING'
 	p[0] = {'value':p[1],'type':'STRING'}
 	p[0]['t_name'] = S_TABLE.new_temp()
-	TAC.emit(p[0]['t_name'],p[1]['value'],'',':=')
+	TAC.emit(p[0]['t_name'],p[1],'',':=')	# issue: how to get the exact string value ??
 
 def p_unsigned_constant_3(p):
 	'unsigned_constant :  RESERVED_NIL'
 	p[0] = {'value':None,'type':'NIL'}
 	p[0]['t_name'] = S_TABLE.new_temp()
-	TAC.emit(p[0]['t_name'],p[1]['value'],'',':=')
+	TAC.emit(p[0]['t_name'],p[1],'',':=')	# issue: how to handle the NIL type ??
 
 
 def p_unsigned_number_1(p):
@@ -1474,67 +1489,67 @@ def p_function_designator_1(p):
 
 
 
-def p_set_constructor_1(p):
-	'set_constructor :  L_SQUARE_BRACKET member_designator_list R_SQUARE_BRACKET'
+# def p_set_constructor_1(p):
+# 	'set_constructor :  L_SQUARE_BRACKET member_designator_list R_SQUARE_BRACKET'
 
-def p_set_constructor_2(p):
-	'set_constructor :  L_SQUARE_BRACKET R_SQUARE_BRACKET'
-
-
-
-def p_member_designator_list_1(p):
-	'member_designator_list :  member_designator_list comma member_designator'
-
-def p_member_designator_list_2(p):
-	'member_designator_list :  member_designator'
+# def p_set_constructor_2(p):
+# 	'set_constructor :  L_SQUARE_BRACKET R_SQUARE_BRACKET'
 
 
 
-def p_member_designator_1(p):
-	'member_designator :  member_designator DOTDOT expression'
+# def p_member_designator_list_1(p):
+# 	'member_designator_list :  member_designator_list comma member_designator'
 
-def p_member_designator_2(p):
-	'member_designator :  expression'
+# def p_member_designator_list_2(p):
+# 	'member_designator_list :  member_designator'
+
+
+
+# def p_member_designator_1(p):
+# 	'member_designator :  member_designator DOTDOT expression'
+
+# def p_member_designator_2(p):
+# 	'member_designator :  expression'
 
 
 
 def p_addop_1(p):
 	'addop :  PLUS'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 def p_addop_2(p):
 	'addop :  MINUS'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 def p_addop_3(p):
 	'addop :  RESERVED_OR'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 def p_addop_4(p):
 	'addop :  RESERVED_XOR'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 
 
 def p_mulop_1(p):
 	'mulop :  TIMES'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 def p_mulop_2(p):
 	'mulop :  DIVIDE'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 def p_mulop_3(p):
 	'mulop :  RESERVED_DIV'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 def p_mulop_4(p):
 	'mulop :  RESERVED_MOD'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 def p_mulop_5(p):
 	'mulop :  RESERVED_AND'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 
 
@@ -1564,7 +1579,7 @@ def p_relop_6(p):
 
 def p_relop_7(p):
 	'relop :  RESERVED_IN'
-	p[0] = {'name':p[1]}
+	p[0] = {'name':p[1].lower()}
 
 
 def p_identifier_1(p):
@@ -1575,13 +1590,13 @@ def p_identifier_1(p):
 def p_identifier_2(p):
 	'identifier :  RESERVED_EXIT'
 	p[0] = {}
-	p[0]['name'] = p[1]
+	p[0]['name'] = p[1].lower()
 	# TAC.emit('','','','exit')
 
 def p_identifier_3(p):
 	'identifier :  RESERVED_STRING'
 	p[0] = {}
-	p[0]['name'] = p[1]
+	p[0]['name'] = p[1].lower()
 
 
 def p_semicolon_1(p):
