@@ -4,3 +4,5 @@ false -> digitseq 0
 
 Write if-else for boolean(relop) evaluation.
 Extend closed_if to other similar cases.
+Width symbol table.
+function name in functions.. test4 not working

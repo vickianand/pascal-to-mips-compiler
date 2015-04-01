@@ -1018,28 +1018,30 @@ def p_open_if_statement_1(p):
 		p[0]['type'] = 'ERROR'
 	else :
 		p[0]['type'] = 'VOID'
+		TAC.emit(p[2]['false'],'','','label')
 
 def p_open_if_statement_2(p):
-	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching closed_statement RESERVED_ELSE open_statement'
+	'open_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching closed_statement RESERVED_ELSE marker_if_false open_statement'
 	p[0] = {}
-	if p[2]['type'] == 'ERROR' or p[4]['type'] == 'ERROR' or p[6]['type'] == 'ERROR':
-		p[0]['type'] = 'ERROR'
-	else :
-		p[0]['type'] = 'VOID'
-
-
-def p_closed_if_statement_1(p):
-	'closed_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching closed_statement RESERVED_ELSE marker_if_false_closed closed_statement'
-	p[0] = {}
-	if p[2]['type'] == 'ERROR' or p[5]['type'] == 'ERROR' or p[5]['type'] == 'ERROR':
+	if p[2]['type'] == 'ERROR' or p[5]['type'] == 'ERROR' or p[8]['type'] == 'ERROR':
 		p[0]['type'] = 'ERROR'
 	else :
 		p[0]['type'] = 'VOID'
 		TAC.emit(p[7]['if_end'],'','','label')
 
 
-def p_marker_if_false_closed_1(p):
-	'marker_if_false_closed :'
+def p_closed_if_statement_1(p):
+	'closed_if_statement :  RESERVED_IF boolean_expression RESERVED_THEN marker_for_branching closed_statement RESERVED_ELSE marker_if_false closed_statement'
+	p[0] = {}
+	if p[2]['type'] == 'ERROR' or p[5]['type'] == 'ERROR' or p[8]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
+		TAC.emit(p[7]['if_end'],'','','label')
+
+
+def p_marker_if_false_1(p):
+	'marker_if_false :'
 	p[0] = {}
 	p[0]['t_name'] = p[-5]['false']
 	p[0]['if_end'] = S_TABLE.new_label()
@@ -1275,8 +1277,8 @@ def p_boolean_expression_1(p):
 	# 	print "DEBUGGING: p_boolean_expression_1"
 	# 	print "p_1_type : "+ p[1]['type']
 	p[0] = {}
-	if p[1]['type'] != 'boolean' and p[1]['type'] != 'ERROR':
-		throw_error("condition in 'if' is not boolean")
+	if p[1]['type'] == 'ERROR':
+		# throw_error("condition in 'if' is not boolean")
 		p[0]['type'] == 'ERROR'
 	else : 
 		p[0] = p[1]
@@ -1349,8 +1351,8 @@ def p_term_1(p):
 def p_term_2(p):
 	'term :  term mulop factor'
 	p[0] = {}
-	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint':
-		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint':
+	if p[1]['type'] == 'integer' or p[1]['type'] == 'longint' or p[1]['type'] == 'boolean':
+		if p[3]['type'] == 'real' or p[3]['type'] == 'integer' or p[3]['type'] == 'longint' or p[1]['type'] == 'boolean':
 			p[0]['type'] = p[3]['type']
 			p[0]['t_name'] = S_TABLE.new_temp()
 			TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
