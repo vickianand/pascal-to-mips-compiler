@@ -139,6 +139,17 @@ def p_label_1(p):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 def p_constant_definition_part_1(p):
 	'constant_definition_part :  RESERVED_CONST constant_list'
 
@@ -237,6 +248,35 @@ def p_non_string_2(p):
 	'non_string :  identifier'
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #TYpe definition and declaration part
 
 def p_type_definition_part_1(p):
@@ -297,6 +337,7 @@ def p_enumerated_type_1(p):
 
 def p_subrange_type_1(p):
 	'subrange_type :  constant DOTDOT constant'
+	p[0] = {}
 
 
 
@@ -469,6 +510,29 @@ def p_domain_type_1(p):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def p_variable_declaration_part_1(p):
 	'variable_declaration_part :  RESERVED_VAR variable_declaration_list semicolon'
 	p[0] = {}
@@ -587,7 +651,7 @@ def p_value_parameter_specification_1(p):
 	p[0] = {}
 	st_entry = S_TABLE.currentScope.look_up(name=p[3]['name'])
 	if st_entry['type'] != 'typedef':
-		throw_error("Type not defined")
+		throw_error("Type not defined - in value_parameter_specification")
 	else:
 		p[0]['type'] = 'VOID'
 	for iden in p[1]['list_id']:
@@ -607,7 +671,7 @@ def p_variable_parameter_specification_1(p):
 	p[0] = {}
 	st_entry = S_TABLE.currentScope.look_up(name=p[4]['name'])
 	if st_entry['type'] != 'typedef':
-		throw_error("Type not defined")
+		throw_error("Type not defined - in variable_parameter_specification")
 	else:
 		p[0]['type'] = 'VOID'
 	for iden in p[2]['list_id']:
