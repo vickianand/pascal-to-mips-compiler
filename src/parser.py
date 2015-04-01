@@ -964,20 +964,35 @@ def p_repeat_statement_1(p):
 
 
 def p_open_while_statement_1(p):
-	'open_while_statement :  RESERVED_WHILE boolean_expression RESERVED_DO open_statement'
-
+	'open_while_statement :  RESERVED_WHILE boolean_expression marker_while RESERVED_DO open_statement'
+	p[0] = {}
+	if p[2]['type'] == 'ERROR' or p[5]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
+	TAC.emit(p[2]['false'],'','','label')
 
 
 def p_closed_while_statement_1(p):
-	'closed_while_statement :  RESERVED_WHILE boolean_expression RESERVED_DO closed_statement'
+	'closed_while_statement :  RESERVED_WHILE boolean_expression marker_while RESERVED_DO closed_statement'
+	p[0] = {}
+	if p[2]['type'] == 'ERROR' or p[5]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
+	TAC.emit(p[2]['false'],'','','label')
 
 
+def p_marker_while_1(p):
+	'marker_while :'
+	p[0] = {}
+	TAC.emit(p[-1]['false'],p[-1]['t_name'],'','IF_FALSE_GOTO')
 
 def p_open_for_statement_1(p):
 	'open_for_statement :  RESERVED_FOR control_variable ASSIGNMENT initial_value direction   final_value RESERVED_DO open_statement'
 	p[0] = {}
 	if p[2]['type'] == p[4]['type'] == p[6]['type'] :
-		if p[2]['type'].lower() == 'integer' or p[2]['type'].lower() == 'longint' or p[2]['type'].lower() == 'shortint' :
+		if p[2]['type'].lower() == 'integer' :
 			if p[8]['type'] == 'VOID' :
 				p[0]['type'] = 'VOID'
 				return
