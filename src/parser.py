@@ -3,6 +3,45 @@ from lexer import lexer, tokens
 import symTab
 import threeAddrCode
 
+
+def temp_real(a) :
+	if a['type'] == 'real':		# no need to type-convert : already a real
+		return a['t_name']
+	elif a['type'] == 'integer':
+		temp_t = S_TABLE.new_temp()
+		# set appropriate offset and width here
+		TAC.emit(temp_t, a['t_name'], '', 'INT_TO_REAL')
+		return temp_t
+	elif a['type'] == 'char':
+		temp_t = S_TABLE.new_temp()
+		# set appropriate offset and width here
+		TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_REAL')
+		return temp_t
+
+	else :
+		error_str = "type-conversion from "+a['type']+"-type to real-type not possible"
+		throw_error(error_st)
+	
+
+def temp_integer(a) :
+	if a['type'] == 'integer' :		# if already of integer-type then nothing to do
+		return a['t_name']
+	elif a['type'] == 'char':
+		temp_t = S_TABLE.new_temp()
+		# set appropriate offset and width here
+		TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_INT')
+		return temp_t
+	else :
+		error_str = "type-conversion from "+a['type']+"-type to real-type not possible"
+		throw_error(error_st)
+
+
+
+
+
+
+
+
 def p_file_1(p):
 	'file :  program'
 
@@ -1044,7 +1083,7 @@ def p_open_for_statement_1(p):
 				TAC.emit(p[7]['for_end'],'','','label')
 				return
 		else :
-			throw_error('ERROR: control variables in for loop should be integer type')
+			throw_error('control variables in for loop should be integer type')
 	else:
 		throw_error('type mismatch amongst control variables of for-loop')
 	p[0]['type'] = 'ERROR'
@@ -1062,7 +1101,7 @@ def p_closed_for_statement_1(p):
 				TAC.emit(p[7]['for_end'],'','','label')
 				return
 		else :
-			throw_error('ERROR: control variables in for loop should be integer type')
+			throw_error('control variables in for loop should be integer type')
 	else:
 		throw_error('type mismatch amongst control variables of for-loop')
 	p[0]['type'] = 'ERROR'
@@ -1146,8 +1185,15 @@ def p_assignment_statement_1(p):
 		p[0]['type'] = 'ERROR'
 		return
 	if (p[1]['type'] != p[3]['type']) :
-		p[0]['type'] = 'ERROR'
-		throw_error("type error during assignment")
+		if p[1]['type'] == 'real' and p[3]['type'] == 'integer' :
+			p[0]['type'] = 'VOID'
+			TAC.emit(p[1]['t_name'],temp_real(p[3]),'',p[2])
+		elif p[1]['type'] == 'integer' and p[3]['type'] == 'char' :
+			p[0]['type'] = 'VOID'
+			TAC.emit(p[1]['t_name'],temp_integer(p[3]),'',p[2])
+		else :
+			p[0]['type'] = 'ERROR'
+			throw_error("type mis-match during assignment : conversion not possible")
 	else:
 		p[0]['type'] = 'VOID'
 		TAC.emit(p[1]['t_name'],p[3]['t_name'],'',p[2])
@@ -1409,10 +1455,12 @@ def p_simple_expression_2(p):
 	# for other operators we are going to type-cast it into the largest-sized data-type .
 	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
 		p[0]['type'] = 'real'					# real is a larger data-type
-		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'real'+p[2]['name'])
+		# TAC.emit(p[0]['t_name'], p[1]['t_name'], p[3]['t_name'], 'real'+p[2]['name'])
+		TAC.emit(p[0]['t_name'], temp_real(p[1]), temp_real(p[3]), 'real'+p[2]['name'])	# temp_real function is used for handling type-conversion during assignment
 	elif p[1]['type'] == 'integer' or p[3]['type'] == 'integer' :
 		p[0]['type'] = 'integer'					# integer is a larger data-type
-		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
+		# TAC.emit(p[0]['t_name'], p[1]['t_name'], p[3]['t_name'], 'int'+p[2]['name'])
+		TAC.emit(p[0]['t_name'], temp_integer(p[1]), temp_integer(p[3]), 'int'+p[2]['name'])	# temp_integer function is used for handling type-conversion during assignment
 	else :
 		p[0]['type'] = 'char'					# char is only left data-type	
 		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'char'+p[2]['name'])
@@ -1439,10 +1487,12 @@ def p_term_2(p):
 	# for other operators we are going to type-cast it into the largest-sized data-type .
 	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
 		p[0]['type'] = 'real'					# real is a larger data-type
-		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'real'+p[2]['name'])
+		# TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'real'+p[2]['name'])
+		TAC.emit(p[0]['t_name'], temp_real(p[1]), temp_real(p[3]), 'real'+p[2]['name'])	# temp_real function is used for handling type-conversion during assignment
 	elif p[1]['type'] == 'integer' or p[3]['type'] == 'integer' :
 		p[0]['type'] = 'integer'					# integer is a larger data-type
-		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
+		# TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
+		TAC.emit(p[0]['t_name'], temp_integer(p[1]), temp_integer(p[3]), 'int'+p[2]['name'])	# temp_integer function is used for handling type-conversion during assignment
 	else :
 		p[0]['type'] = 'char'					# char is only left data-type	
 		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'char'+p[2]['name'])
@@ -1707,7 +1757,7 @@ def p_error(p):
 	return tok
 
 def throw_error(err):
-	print err
+	print "ERROR: "+err
 
 parser = yacc.yacc()
 
