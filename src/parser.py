@@ -993,9 +993,19 @@ def p_non_labeled_open_statement_4(p):
 
 
 def p_repeat_statement_1(p):
-	'repeat_statement :  RESERVED_REPEAT statement_sequence RESERVED_UNTIL boolean_expression'
+	'repeat_statement :  RESERVED_REPEAT repeat_begin_marker statement_sequence RESERVED_UNTIL boolean_expression'
+	TAC.emit(p[2]['repeat_begin'],p[5]['t_name'], '','IF_TRUE_GOTO')
+	p[0] = {}
+	if p[3]['type'] == 'ERROR' or p[5]['type'] == 'ERROR':
+		p[0]['type'] = 'ERROR'
+	else :
+		p[0]['type'] = 'VOID'
 
-
+def p_repeat_begin_marker_1(p):
+	'repeat_begin_marker : '
+	p[0] = {}
+	p[0]['repeat_begin'] = S_TABLE.new_label()
+	TAC.emit(p[0]['repeat_begin'],'','','label')
 
 def p_open_while_statement_1(p):
 	'open_while_statement :  RESERVED_WHILE boolean_expression marker_while RESERVED_DO open_statement'
@@ -1023,12 +1033,15 @@ def p_marker_while_1(p):
 	TAC.emit(p[-1]['false'],p[-1]['t_name'],'','IF_FALSE_GOTO')
 
 def p_open_for_statement_1(p):
-	'open_for_statement :  RESERVED_FOR control_variable ASSIGNMENT initial_value direction   final_value RESERVED_DO open_statement'
+	'open_for_statement :  RESERVED_FOR control_variable ASSIGNMENT initial_value direction final_value marker_for_for_branching RESERVED_DO open_statement'
 	p[0] = {}
 	if p[2]['type'] == p[4]['type'] == p[6]['type'] :
 		if p[2]['type'].lower() == 'integer' :
 			if p[8]['type'] == 'VOID' :
 				p[0]['type'] = 'VOID'
+				TAC.emit(p[2]['t_name'], p[2]['t_name'], 1,'int'+p[5]['control_op'])
+				TAC.emit(p[7]['cond_chek_label'],'','','GOTO')
+				TAC.emit(p[7]['for_end'],'','','label')
 				return
 		else :
 			throw_error('ERROR: control variables in for loop should be integer type')
@@ -1038,18 +1051,34 @@ def p_open_for_statement_1(p):
 
 
 def p_closed_for_statement_1(p):
-	'closed_for_statement :  RESERVED_FOR control_variable ASSIGNMENT initial_value direction   final_value RESERVED_DO closed_statement'
+	'closed_for_statement :  RESERVED_FOR control_variable ASSIGNMENT initial_value direction final_value marker_for_for_branching RESERVED_DO closed_statement'
 	p[0] = {}
 	if p[2]['type'] == p[4]['type'] == p[6]['type'] :
-		if p[2]['type'].lower() == 'integer' or p[2]['type'].lower() == 'longint' or p[2]['type'].lower() == 'shortint' :
-			if p[8]['type'] == 'VOID' :
+		if p[2]['type'].lower() == 'integer' :
+			if p[9]['type'] == 'VOID' :
 				p[0]['type'] = 'VOID'
+				TAC.emit(p[2]['t_name'], p[2]['t_name'], 1,'int'+p[5]['control_op'])
+				TAC.emit(p[7]['cond_chek_label'],'','','GOTO')
+				TAC.emit(p[7]['for_end'],'','','label')
 				return
 		else :
 			throw_error('ERROR: control variables in for loop should be integer type')
 	else:
 		throw_error('type mismatch amongst control variables of for-loop')
 	p[0]['type'] = 'ERROR'
+
+
+def p_marker_for_for_branching_1(p):
+	'marker_for_for_branching : '
+	p[0] = {}
+	TAC.emit(p[-5]['t_name'],p[-3]['t_name'],'',p[-4])
+	p[0]['cond_chek_label'] = S_TABLE.new_label()
+	TAC.emit(p[0]['cond_chek_label'],'','','label')
+	p[0]['bool_temp'] = S_TABLE.new_temp()
+	TAC.emit(p[0]['bool_temp'],p[-5]['t_name'],p[-1]['t_name'],p[-2]['relop'])
+	p[0]['for_end'] = S_TABLE.new_label()
+	TAC.emit(p[0]['for_end'],p[0]['bool_temp'],'','IF_FALSE_GOTO')
+
 
 def p_open_with_statement_1(p):
 	'open_with_statement :  RESERVED_WITH record_variable_list RESERVED_DO open_statement'
@@ -1301,9 +1330,15 @@ def p_initial_value_1(p):
 
 def p_direction_1(p):
 	'direction :  RESERVED_TO'
+	p[0] = {}
+	p[0]['relop'] = '<='
+	p[0]['control_op'] = '+'
 
 def p_direction_2(p):
 	'direction :  RESERVED_DOWNTO'
+	p[0] = {}
+	p[0]['relop'] = '>='
+	p[0]['control_op'] = '-'
 
 
 
