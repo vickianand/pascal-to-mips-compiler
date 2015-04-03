@@ -329,7 +329,6 @@ def p_new_type_3(p):
 
 def p_new_ordinal_type_2(p):
 	'new_ordinal_type :  subrange_type'
-	# p[]
 
 
 
