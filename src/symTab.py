@@ -9,7 +9,7 @@ class Scope:
 		self.EntryList = {'integer':{'type':'typedef', 'width': 4},
 							'real':{'type':'typedef', 'width': 4},
 							'char':{'type':'typedef', 'width': 1},
-							'string':{'type':'typedef', 'width': 4} 
+							'string':{'type':'typedef', 'width': 4}
 						} # include boolean, long , float etc.
 		self.num_entries = 0
 		self.parentScope = parent
