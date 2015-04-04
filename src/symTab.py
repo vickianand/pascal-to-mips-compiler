@@ -24,8 +24,8 @@ class Scope:
 		self.EntryList[name]['name'] = name
 		return self.EntryList[name]
 
-	def add_temp(self,t_name,width):
-		self.tempList[name] = {}
+	def add_temp(self,t_name,typ,width,corres_identifier,s_entry):
+		self.tempList[name] = {'offset':self.width,'width':width,'type':typ,'corres_identifier':corres_identifier,'s_entry':s_entry}
 		self.width += width
 		self.tempList[name]['name'] = t_name
 		return self.tempList[name]
@@ -65,10 +65,10 @@ class SymTable:
 	def end_scope(self):
 		self.currentScope = self.currentScope.parentScope
 
-	def new_temp(self,s_enrty={},type=''):
+	def new_temp(self,s_entry={},typ='',width=4,corres_identifier=''):
 		self.temp_var_count += 1
 		name = "t" + str(self.temp_var_count)
-		self.currentScope.add_id('')
+		self.currentScope.add_temp(name,typ,width,corres_identifier,s_entry)
 		return name
 
 	def new_label(self):
