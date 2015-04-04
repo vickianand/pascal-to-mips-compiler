@@ -664,13 +664,14 @@ def p_procedure_and_function_declaration_part_2(p):
 	p[0] = p[1]
 
 
-def p_procedure_declaration_1(p):
-	'procedure_declaration :  procedure_heading semicolon directive'
-	p[0] = p[1]
+# def p_procedure_declaration_1(p):
+# 	'procedure_declaration :  procedure_heading semicolon directive'
+# 	p[0] = p[1]
 
 def p_procedure_declaration_2(p):
 	'procedure_declaration :  procedure_heading semicolon procedure_block'
 	p[0] = p[1]
+	S_TABLE.end_scope()
 
 
 
@@ -685,14 +686,19 @@ def p_procedure_heading_2(p):
 		p[0]['type'] = 'ERROR'
 	else:
 		p[0]['type'] = 'VOID'
+		p[1]['p_st_entry']['type_list'] = p[2]['type_list']
+		p[1]['p_st_entry']['param_width'] = p[2]['width']
+		p[1]['p_st_entry']['label'] = S_TABLE.new_label()
+		p[1]['p_st_entry']['arg_type_list'] = p[2]['arg_type_list']
+		TAC.emit(p[1]['p_st_entry']['label'],'','','label')
 
 
 
-def p_directive_1(p):
-	'directive :  RESERVED_FORWARD'
+# def p_directive_1(p):
+# 	'directive :  RESERVED_FORWARD'
 
-def p_directive_2(p):
-	'directive :  RESERVED_EXTERNAL'
+# def p_directive_2(p):
+# 	'directive :  RESERVED_EXTERNAL'
 
 
 
@@ -706,6 +712,7 @@ def p_formal_parameter_section_list_1(p):
 	'formal_parameter_section_list :  formal_parameter_section_list semicolon formal_parameter_section'
 	p[0] = {}
 	p[0]['type_list'] = p[1]['type_list'] + p[3]['type_list']
+	p[0]['arg_type_list'] = p[1]['arg_type_list'] + p[3]['arg_type_list']
 	p[0]['width'] = p[1]['width'] + p[3]['width']
 	if p[1]['type'] ==  'ERROR' or p[3]['type'] ==  'ERROR':
 		p[0]['type'] = 'ERROR'
@@ -739,6 +746,7 @@ def p_value_parameter_specification_1(p):
 	'value_parameter_specification :  identifier_list COLON identifier'
 	p[0] = {}
 	p[0]['type_list'] = []
+	p[0]['arg_type_list'] = []
 	p[0]['width'] = 0
 	st_entry = S_TABLE.currentScope.look_up(name=p[3]['name'])
 
@@ -749,42 +757,45 @@ def p_value_parameter_specification_1(p):
 	else:
 		p[0]['type'] = 'VOID'
 		type_width = st_entry['width']
-	for iden in p[1]['list_id']:
-		st_entry = S_TABLE.currentScope.look_up(name=iden)
-		if st_entry is not None:
-			throw_error("Variable re-declaration")
-			p[0]['type'] = 'ERROR'
-		else:
-			st_entry = S_TABLE.currentScope.add_id(name=iden)
-			S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['name'],'t_name':S_TABLE.new_temp()})
-			p[0]['type_list'] = p[0]['type_list'] + [p[3]['name']]
-			p[0]['type'] = 'VOID'
-			p[0]['width'] += type_width
+		for iden in p[1]['list_id']:
+			st_entry = S_TABLE.currentScope.look_up(name=iden)
+			if st_entry is not None:
+				throw_error("Variable re-declaration")
+				p[0]['type'] = 'ERROR'
+			else:
+				st_entry = S_TABLE.currentScope.add_id(name=iden)
+				S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['name'],'t_name':S_TABLE.new_temp()})
+				p[0]['type_list'] = p[0]['type_list'] + [p[3]['name']]
+				p[0]['arg_type_list'] = p[0]['arg_type_list'] + ['val']
+				p[0]['type'] = 'VOID'
+				p[0]['width'] += type_width
 
 
 
 def p_variable_parameter_specification_1(p):
 	'variable_parameter_specification :  RESERVED_VAR identifier_list COLON identifier'
 	p[0] = {}
-	p[0]['type_list']
+	p[0]['type_list'] = []
+	p[0]['arg_type_list'] = []
 	p[0]['width'] = 0
 	st_entry = S_TABLE.currentScope.look_up(name=p[4]['name'])
 	if st_entry['type'] != 'typedef':
 		throw_error("Type not defined - in variable_parameter_specification")
 	else:
 		p[0]['type'] = 'VOID'
-		type_width = st_entry['type']['width']
-	for iden in p[2]['list_id']:
-		st_entry = S_TABLE.currentScope.look_up(name=iden)
-		if st_entry is not None:
-			throw_error("Variable re-declaration")
-			p[0]['type'] = 'ERROR'
-		else:
-			st_entry = S_TABLE.currentScope.add_id(name=iden)
-			S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[4]['name'],'t_name':S_TABLE.new_temp()})
-			p[0]['type_list'] = p[0]['type_list'] + p[3]['name']
-			p[0]['type'] = 'VOID'
-			p[0]['width'] += type_width
+		type_width = st_entry['width']
+		for iden in p[2]['list_id']:
+			st_entry = S_TABLE.currentScope.look_up(name=iden)
+			if st_entry is not None:
+				throw_error("Variable re-declaration")
+				p[0]['type'] = 'ERROR'
+			else:
+				st_entry = S_TABLE.currentScope.add_id(name=iden)
+				S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[4]['name'],'t_name':S_TABLE.new_temp()})
+				p[0]['type_list'] = p[0]['type_list'] + [p[4]['name']]
+				p[0]['arg_type_list'] = p[0]['arg_type_list'] + ['var']
+				p[0]['type'] = 'VOID'
+				p[0]['width'] += type_width
 
 
 def p_procedural_parameter_specification_1(p):
@@ -806,8 +817,9 @@ def p_procedure_identification_1(p):
 		p[0]['type'] = 'ERROR'
 	else :
 		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
-		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'procedure'})
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'procedure','type_list':[],'arg_type_list':[],'t_name':S_TABLE.new_temp(),'param_width':0})
 		p[0]['type'] = 'VOID'
+		p[0]['p_st_entry'] = st_entry
 		S_TABLE.begin_scope(name=p[2]['name'])
 		TAC.add_func(p[2]['name'])
 
@@ -816,13 +828,14 @@ def p_procedure_identification_1(p):
 
 def p_procedure_block_1(p):
 	'procedure_block :  block'
+	p[0] = p[1]
 
 
 
-def p_function_declaration_1(p):
-	'function_declaration :  function_heading semicolon directive'
-	TAC.emit('','','','FUNC_RETURN')
-	S_TABLE.end_scope()
+# def p_function_declaration_1(p):
+# 	'function_declaration :  function_heading semicolon directive'
+# 	TAC.emit('','','','FUNC_RETURN')
+# 	S_TABLE.end_scope()
 
 def p_function_declaration_2(p):
 	'function_declaration :  function_identification semicolon function_block'
@@ -855,7 +868,7 @@ def p_function_heading_1(p):
 	else:
 		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
 		p[0]['label'] = S_TABLE.new_label()
-		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type'],'label':p[0]['label'],'type_list':[],'t_name':S_TABLE.new_temp(),'param_width':0})
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type'],'label':p[0]['label'],'type_list':[],'arg_type_list':[],'t_name':S_TABLE.new_temp(),'param_width':0})
 		p[0]['type'] = 'VOID'
 		S_TABLE.begin_scope(name=p[2]['name'])
 		TAC.add_func(p[2]['name'])
@@ -870,6 +883,7 @@ def p_function_heading_2(p):
 	p[0]['label'] = S_TABLE.new_label()
 	p[3]['f_st_entry']['label'] = p[0]['label']
 	p[3]['f_st_entry']['type_list'] = p[4]['type_list']
+	p[3]['f_st_entry']['arg_type_list'] = p[4]['arg_type_list']
 	p[3]['f_st_entry']['t_name'] = S_TABLE.new_temp()
 	p[3]['f_st_entry']['param_width'] = p[4]['width']
 	TAC.emit(p[0]['label'],'','','label')
@@ -1368,26 +1382,41 @@ def p_index_expression_1(p):
 
 def p_procedure_statement_1(p):
 	'procedure_statement :  identifier params'
-	p[0] = {}
-	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
-	if st_entry == None:
-		throw_error('undeclared function/procedure used')
-		p[0]['type'] = 'ERROR'
-		return
-	elif st_entry['type'] != 'procedure':
-		throw_error('this identifier cannot be used as a function or procedure')
-		p[0]['type'] = 'ERROR'
-		return
-	else:
-		p[1]['type'] = 'VOID'
-
-	if p[1]['type'] == 'ERROR' or p[2]['type'] == 'ERROR':
-		p[0]['type'] = 'ERROR'
+	st_entry = S_TABLE.currentScope.look_up(name = p[1]['name'])
+	if(st_entry == None) :
+		throw_error("procedure yet not defined")
+		p[0] = {'type' : 'ERROR'}
+	elif st_entry['type'] != 'procedure' :
+		throw_error('this identifier cannot be used as a procedure ')
+		p[0] = {'type' : 'ERROR'}
 	else :
-		p[0]['type'] = 'VOID'
+		p[0] = {'type' : 'VOID','t_name':S_TABLE.new_temp()}
+		if match_list(p[2]['type_list'],st_entry['type_list']) :
+			TAC.emit('',st_entry['param_width'],'','SET_PARAM_OFFSET_WIDTH')
+			for i,params in enumerate(p[2]['list']):
+				if(st_entry['arg_type_list'][i] == 'var'):
+					TAC.emit(params['t_name'],'','','PUSH_VAR_PARAMS')
+				else:
+					TAC.emit(params['t_name'],'','','PUSH_VAL_PARAMS')
+			TAC.emit(st_entry['label'],'','','CALL_PROCEDURE')
 
 def p_procedure_statement_2(p):
 	'procedure_statement :  identifier'
+	p[0] = {}
+	st_entry = S_TABLE.currentScope.look_up(name=p[1]['name'])
+	st_entry = S_TABLE.currentScope.look_up(name = p[1]['name'])
+	if(st_entry == None) :
+		throw_error("procedure yet not defined")
+		p[0] = {'type' : 'ERROR'}
+	elif st_entry['type'] != 'procedure' :
+		throw_error('this identifier cannot be used as a procedure ')
+		p[0] = {'type' : 'ERROR'}
+	else :
+		p[0] = {'type' : 'VOID','t_name':S_TABLE.new_temp()}
+		# if st_entry['type_list'] == []
+		TAC.emit(st_entry['label'],'','','CALL_PROCEDURE')
+		# else :
+		# 	throw_error('parameter numbers of procedure not matching with definition of procedure')
 
 
 
@@ -1742,7 +1771,8 @@ def p_function_designator_1(p):
 			TAC.emit('',st_entry['param_width'],'','SET_PARAM_OFFSET_WIDTH')
 			for params in p[2]['list']:
 				TAC.emit(params['t_name'],'','','PARAMS')
-			TAC.emit(st_entry['label'],'','','CALL_PROCEDURE')
+			TAC.emit(st_entry['label'],'','','CALL_FUNCTION')
+
 
 
 # def p_set_constructor_1(p):

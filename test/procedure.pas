@@ -9,7 +9,15 @@ Var
   Res : Integer;
 
 Begin
- Writeln('The square of 5 is: ');
+ // Writeln('The square of 5 is: ');
  Square(5, Res);
- Writeln(Res);
+ // Write(Res);
 End.
+
+
+// square
+// ['label_1', '', '', 'label']
+// ['t4', 't2', 't2', 'int*']
+// ['t3', 't4', '', ':=']
+// ['t6', 5, '', ':=']
+// root

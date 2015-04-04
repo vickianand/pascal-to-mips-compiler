@@ -11,6 +11,8 @@ class Scope:
 							'char':{'type':'typedef', 'width': 1},
 							'string':{'type':'typedef', 'width': 4}
 						} # include boolean, long , float etc.
+		self.tempList = {}
+		self.width = 0
 		self.num_entries = 0
 		self.parentScope = parent
 		self.name = name
@@ -21,6 +23,12 @@ class Scope:
 		self.num_entries += 1
 		self.EntryList[name]['name'] = name
 		return self.EntryList[name]
+
+	def add_temp(self,t_name,width):
+		self.tempList[name] = {}
+		self.width += width
+		self.tempList[name]['name'] = t_name
+		return self.tempList[name]
 
 	def look_up(self,name):
 		scope = self
@@ -57,9 +65,11 @@ class SymTable:
 	def end_scope(self):
 		self.currentScope = self.currentScope.parentScope
 
-	def new_temp(self):
+	def new_temp(self,s_enrty={},type=''):
 		self.temp_var_count += 1
-		return "t" + str(self.temp_var_count)
+		name = "t" + str(self.temp_var_count)
+		self.currentScope.add_id('')
+		return name
 
 	def new_label(self):
 		self.label_count += 1
