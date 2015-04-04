@@ -4,6 +4,8 @@
 # 		self.name = name
 # 		self.size = -1
 # 		self.type = undefined
+import pprint
+
 class Scope:
 	def __init__(self,parent,name):
 		self.EntryList = {'integer':{'type':'typedef', 'width': 4},
@@ -24,10 +26,10 @@ class Scope:
 		self.EntryList[name]['name'] = name
 		return self.EntryList[name]
 
-	def add_temp(self,t_name,typ,width,corres_identifier,s_entry):
+	def add_temp(self,name,typ,width,corres_identifier,s_entry):
 		self.tempList[name] = {'offset':self.width,'width':width,'type':typ,'corres_identifier':corres_identifier,'s_entry':s_entry}
 		self.width += width
-		self.tempList[name]['name'] = t_name
+		self.tempList[name]['name'] = name
 		return self.tempList[name]
 
 	def look_up(self,name):
@@ -58,22 +60,29 @@ class SymTable:
 		self.currentScope = Scope(parent=None,name='root')
 		self.temp_var_count = 0;
 		self.label_count = 0;
+		self.scope_list = {}
 
 	def begin_scope(self,name):
 		self.currentScope = Scope(parent=self.currentScope,name=name)
+		self.scope_list['name'] = self.currentScope
 
 	def end_scope(self):
 		self.currentScope = self.currentScope.parentScope
 
-	def new_temp(self,s_entry={},typ='',width=4,corres_identifier=''):
+	def new_temp(self,s_entry={},typ='',width=4,name=''):
 		self.temp_var_count += 1
-		name = "t" + str(self.temp_var_count)
-		self.currentScope.add_temp(name,typ,width,corres_identifier,s_entry)
-		return name
+		name2 = "t" + str(self.temp_var_count)
+		self.currentScope.add_temp(name2,typ,width,name,s_entry)
+		return name2
 
 	def new_label(self):
 		self.label_count += 1
 		return "label_" + str(self.label_count)
+
+	def print_temp(self):
+		for sc_name in self.scope_list:
+			pprint.pprint(sc_name)
+			pprint.pprint(self.scope_list[sc_name].tempList)
 
 
 

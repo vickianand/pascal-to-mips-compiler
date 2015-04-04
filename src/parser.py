@@ -1933,3 +1933,4 @@ if __name__ == "__main__":
     TAC = threeAddrCode.ThreeAddrCode(S_TABLE)
     testYacc(inputFile)
     TAC.print_TAC()
+    # S_TABLE.print_temp()
