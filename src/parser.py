@@ -1346,7 +1346,7 @@ def p_indexed_variable_1(p):
 def p_index_expression_list_1(p):
 	'index_expression_list :  index_expression_list comma index_expression'
 	p[0] = {}
-	p[0]['list'] = p[1]['index_list'] + [p[3]]
+	p[0]['list'] = p[1]['list'] + [p[3]]
 
 def p_index_expression_list_2(p):
 	'index_expression_list :  index_expression'
