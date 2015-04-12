@@ -54,11 +54,6 @@ def p_file_1(p):
 
 
 
-def p_file_2(p):
-	'file :  module'
-
-
-
 def p_program_1(p):
 	'program :  program_heading semicolon block DOT'
 
@@ -113,16 +108,6 @@ def p_declaration_part_list_2(p):
 
 
 
-def p_declaration_entity_1(p):
-	'declaration_entity :  label_declaration_part'
-	p[0] = {}
-	p[0]['type'] = p[1]['type']
-
-def p_declaration_entity_2(p):
-	'declaration_entity :  constant_definition_part'
-	p[0] = {}
-	p[0]['type'] = p[1]['type']
-
 def p_declaration_entity_3(p):
 	'declaration_entity :  type_definition_part'
 	p[0] = {}
@@ -140,133 +125,6 @@ def p_declaration_entity_5(p):
 
 
 
-def p_module_1(p):
-	'module :  module_declaration_part_list'
-
-
-
-def p_module_declaration_part_list_1(p):
-	'module_declaration_part_list :  module_declaration_part_list module_declaration_entity'
-
-def p_module_declaration_part_list_2(p):
-	'module_declaration_part_list :  module_declaration_entity'
-
-
-
-def p_module_declaration_entity_1(p):
-	'module_declaration_entity :  constant_definition_part'
-
-def p_module_declaration_entity_2(p):
-	'module_declaration_entity :  type_definition_part'
-
-def p_module_declaration_entity_3(p):
-	'module_declaration_entity :  variable_declaration_part'
-
-def p_module_declaration_entity_4(p):
-	'module_declaration_entity :  procedure_and_function_declaration_part'
-
-
-
-def p_label_declaration_part_1(p):
-	'label_declaration_part :  RESERVED_LABEL label_list semicolon'
-
-
-
-def p_label_list_1(p):
-	'label_list :  label_list comma label'
-
-def p_label_list_2(p):
-	'label_list :  label'
-
-
-
-def p_label_1(p):
-	'label :  DIGITSEQ'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def p_constant_definition_part_1(p):
-	'constant_definition_part :  RESERVED_CONST constant_list'
-
-
-
-def p_constant_list_1(p):
-	'constant_list :  constant_list constant_definition'
-
-def p_constant_list_2(p):
-	'constant_list :  constant_definition'
-
-
-
-def p_constant_definition_1(p):
-	'constant_definition :  identifier EQ cexpression semicolon'
-
-
-
-def p_cexpression_1(p):
-	'cexpression :  csimple_expression'
-
-def p_cexpression_2(p):
-	'cexpression :  csimple_expression relop csimple_expression'
-
-
-
-def p_csimple_expression_1(p):
-	'csimple_expression :  cterm'
-
-def p_csimple_expression_2(p):
-	'csimple_expression :  csimple_expression addop cterm'
-
-
-
-def p_cterm_1(p):
-	'cterm :  cfactor'
-
-def p_cterm_2(p):
-	'cterm :  cterm mulop cfactor'
-
-
-
-def p_cfactor_1(p):
-	'cfactor :  sign cfactor'
-
-def p_cfactor_2(p):
-	'cfactor :  cexponentiation'
-
-
-
-def p_cexponentiation_1(p):
-	'cexponentiation :  cprimary'
-
-def p_cexponentiation_2(p):
-	'cexponentiation :  cprimary POWER cexponentiation'
-
-
-
-def p_cprimary_1(p):
-	'cprimary :  identifier'
-
-def p_cprimary_2(p):
-	'cprimary :  LPAREN cexpression RPAREN'
-
-def p_cprimary_3(p):
-	'cprimary :  unsigned_constant'
-
-def p_cprimary_4(p):
-	'cprimary :  RESERVED_NOT cprimary'
-
-
 
 def p_constant_1(p):
 	'constant :  non_string'
@@ -277,11 +135,6 @@ def p_constant_2(p):
 	p[0] = p[1]
 	if p[1]['name'] == '-' :
 		p[0]['value'] = -1*p[0]['value']
-
-# def p_constant_3(p):
-# 	'constant :  STRING'
-
-
 
 def p_sign_1(p):
 	'sign :  PLUS'
@@ -295,13 +148,6 @@ def p_sign_2(p):
 def p_non_string_1(p):
 	'non_string :  DIGITSEQ'
 	p[0] = {'value':p[1],'type':'integer'}
-
-# def p_non_string_2(p):
-# 	'non_string :  identifier'
-
-
-
-
 
 
 
@@ -377,18 +223,9 @@ def p_new_type_3(p):
 	'new_type :  new_pointer_type'
 
 
-
-# def p_new_ordinal_type_1(p):
-# 	'new_ordinal_type :  enumerated_type'
-
 def p_new_ordinal_type_2(p):
 	'new_ordinal_type :  subrange_type'
 	p[0] = p[1]
-
-
-
-# def p_enumerated_type_1(p):
-# 	'enumerated_type :  LPAREN identifier_list RPAREN'
 
 
 
@@ -403,23 +240,11 @@ def p_subrange_type_1(p):
 def p_new_structured_type_1(p):
 	'new_structured_type :  structured_type'
 	p[0] = p[1]
-# def p_new_structured_type_2(p):
-# 	'new_structured_type :  RESERVED_PACKED structured_type'
-
 
 
 def p_structured_type_1(p):
 	'structured_type :  array_type'
 	p[0] = p[1]
-
-# def p_structured_type_2(p):
-# 	'structured_type :  record_type'
-
-# def p_structured_type_3(p):
-# 	'structured_type :  set_type'
-
-# def p_structured_type_4(p):
-# 	'structured_type :  file_type'
 
 
 
@@ -465,10 +290,6 @@ def p_ordinal_type_1(p):
 	'ordinal_type :  new_ordinal_type'
 	p[0] = p[1]
 
-# def p_ordinal_type_2(p):
-# 	'ordinal_type :  identifier'
-
-
 
 def p_component_type_1(p):
 	'component_type :  identifier'
@@ -479,108 +300,6 @@ def p_component_type_1(p):
 	else:
 		p[0]['type'] = p[1]['name']
 		p[0]['width'] = st_entry['width']
-
-
-# def p_record_type_1(p):
-# 	'record_type :  RESERVED_RECORD record_section_list RESERVED_END'
-
-# def p_record_type_2(p):
-# 	'record_type :  RESERVED_RECORD record_section_list semicolon variant_part RESERVED_END'
-
-# def p_record_type_3(p):
-# 	'record_type :  RESERVED_RECORD variant_part RESERVED_END'
-
-
-
-# def p_record_section_list_1(p):
-# 	'record_section_list :  record_section_list semicolon record_section'
-
-# def p_record_section_list_2(p):
-# 	'record_section_list :  record_section'
-
-
-
-# def p_record_section_1(p):
-# 	'record_section :  identifier_list COLON type_denoter'
-
-
-
-# def p_variant_part_1(p):
-# 	'variant_part :  RESERVED_CASE variant_selector RESERVED_OF variant_list semicolon'
-
-# def p_variant_part_2(p):
-# 	'variant_part :  RESERVED_CASE variant_selector RESERVED_OF variant_list'
-
-# def p_variant_part_3(p):
-# 	'variant_part : '
-
-
-
-# def p_variant_selector_1(p):
-# 	'variant_selector :  tag_field COLON tag_type'
-
-# def p_variant_selector_2(p):
-# 	'variant_selector :  tag_type'
-
-
-
-# def p_variant_list_1(p):
-# 	'variant_list :  variant_list semicolon variant'
-
-# def p_variant_list_2(p):
-# 	'variant_list :  variant'
-
-
-
-# def p_variant_1(p):
-# 	'variant :  case_constant_list COLON LPAREN record_section_list RPAREN'
-
-# def p_variant_2(p):
-# 	'variant :  case_constant_list COLON LPAREN record_section_list semicolon  variant_part RPAREN'
-
-# def p_variant_3(p):
-# 	'variant :  case_constant_list COLON LPAREN variant_part RPAREN'
-
-
-
-def p_case_constant_list_1(p):
-	'case_constant_list :  case_constant_list comma case_constant'
-
-def p_case_constant_list_2(p):
-	'case_constant_list :  case_constant'
-
-
-
-def p_case_constant_1(p):
-	'case_constant :  constant'
-
-def p_case_constant_2(p):
-	'case_constant :  constant DOTDOT constant'
-
-
-
-# def p_tag_field_1(p):
-# 	'tag_field :  identifier'
-
-
-
-# def p_tag_type_1(p):
-# 	'tag_type :  identifier'
-
-
-
-# def p_set_type_1(p):
-# 	'set_type :  RESERVED_SET RESERVED_OF base_type'
-
-
-
-# def p_base_type_1(p):
-# 	'base_type :  ordinal_type'
-
-
-
-# def p_file_type_1(p):
-# 	'file_type :  RESERVED_FILE RESERVED_OF component_type'
 
 
 
@@ -666,10 +385,6 @@ def p_procedure_and_function_declaration_part_2(p):
 
 
 
-# def p_procedure_declaration_1(p):
-# 	'procedure_declaration :  procedure_heading semicolon directive'
-# 	p[0] = p[1]
-
 def p_procedure_declaration_2(p):
 	'procedure_declaration :  procedure_heading semicolon procedure_block'
 	p[0] = p[1]
@@ -695,12 +410,6 @@ def p_procedure_heading_2(p):
 		TAC.emit(p[1]['p_st_entry']['label'],'','','label')
 
 
-
-# def p_directive_1(p):
-# 	'directive :  RESERVED_FORWARD'
-
-# def p_directive_2(p):
-# 	'directive :  RESERVED_EXTERNAL'
 
 
 
@@ -832,12 +541,6 @@ def p_procedure_block_1(p):
 	'procedure_block :  block'
 	p[0] = p[1]
 
-
-
-# def p_function_declaration_1(p):
-# 	'function_declaration :  function_heading semicolon directive'
-# 	TAC.emit('','','','FUNC_RETURN')
-# 	S_TABLE.end_scope()
 
 def p_function_declaration_2(p):
 	'function_declaration :  function_identification semicolon function_block'
@@ -1019,10 +722,6 @@ def p_statement_2(p):
 
 
 
-def p_open_statement_1(p):
-	'open_statement :  label COLON non_labeled_open_statement'
-	p[0] = {}
-	p[0]['type'] = p[1]['type']
 
 def p_open_statement_2(p):
 	'open_statement :  non_labeled_open_statement'
@@ -1030,11 +729,6 @@ def p_open_statement_2(p):
 	p[0]['type'] = p[1]['type']
 
 
-
-def p_closed_statement_1(p):
-	'closed_statement :  label COLON non_labeled_closed_statement'
-	p[0] = {}
-	p[0]['type'] = p[1]['type']
 
 def p_closed_statement_2(p):
 	'closed_statement :  non_labeled_closed_statement'
@@ -1053,18 +747,9 @@ def p_non_labeled_closed_statement_2(p):
 	p[0] = {}
 	p[0]['type'] = p[1]['type']
 
-def p_non_labeled_closed_statement_3(p):
-	'non_labeled_closed_statement :  goto_statement'
-	p[0] = {}
-	p[0]['type'] = p[1]['type']
 
 def p_non_labeled_closed_statement_4(p):
 	'non_labeled_closed_statement :  compound_statement'
-	p[0] = {}
-	p[0]['type'] = p[1]['type']
-
-def p_non_labeled_closed_statement_5(p):
-	'non_labeled_closed_statement :  case_statement'
 	p[0] = {}
 	p[0]['type'] = p[1]['type']
 
@@ -1377,10 +1062,6 @@ def p_index_expression_1(p):
 
 
 
-# def p_field_designator_1(p):
-# 	'field_designator :  variable_access DOT identifier'
-
-
 
 def p_procedure_statement_1(p):
 	'procedure_statement :  identifier params'
@@ -1461,49 +1142,8 @@ def p_actual_parameter_3(p):
 
 
 
-def p_goto_statement_1(p):
-	'goto_statement :  RESERVED_GOTO label'
-
-
-
-def p_case_statement_1(p):
-	'case_statement :  RESERVED_CASE case_index RESERVED_OF case_list_element_list RESERVED_END'
-
-def p_case_statement_2(p):
-	'case_statement :  RESERVED_CASE case_index RESERVED_OF case_list_element_list SEMI_COLON RESERVED_END'
-
-def p_case_statement_3(p):
-	'case_statement :  RESERVED_CASE case_index RESERVED_OF case_list_element_list semicolon   otherwisepart statement RESERVED_END'
-
-def p_case_statement_4(p):
-	'case_statement :  RESERVED_CASE case_index RESERVED_OF case_list_element_list semicolon   otherwisepart statement SEMI_COLON RESERVED_END'
-
-
-
-def p_case_index_1(p):
-	'case_index :  expression'
-
-
-
-def p_case_list_element_list_1(p):
-	'case_list_element_list :  case_list_element_list semicolon case_list_element'
-
-def p_case_list_element_list_2(p):
-	'case_list_element_list :  case_list_element'
-
-
-
-def p_case_list_element_1(p):
-	'case_list_element :  case_constant_list COLON statement'
-
-
-
-def p_otherwisepart_1(p):
-	'otherwisepart :  RESERVED_OTHERWISE'
-
-def p_otherwisepart_2(p):
-	'otherwisepart :  RESERVED_OTHERWISE COLON'
-
+# def p_goto_statement_1(p):
+# 	'goto_statement :  RESERVED_GOTO label'
 
 
 def p_control_variable_1(p):
@@ -1701,9 +1341,6 @@ def p_primary_3(p):
 	'primary :  function_designator'
 	p[0] = p[1]
 
-# def p_primary_4(p):
-# 	'primary :  set_constructor'
-# 	p[0] = p[1]
 
 def p_primary_5(p):
 	'primary :  LPAREN expression RPAREN'	# if its bracketd, it surpasses all the precedence of operators
@@ -1775,29 +1412,6 @@ def p_function_designator_1(p):
 				TAC.emit(params['t_name'],'','','PARAMS')
 			TAC.emit(st_entry['label'],'','','CALL_FUNCTION')
 
-
-
-# def p_set_constructor_1(p):
-# 	'set_constructor :  L_SQUARE_BRACKET member_designator_list R_SQUARE_BRACKET'
-
-# def p_set_constructor_2(p):
-# 	'set_constructor :  L_SQUARE_BRACKET R_SQUARE_BRACKET'
-
-
-
-# def p_member_designator_list_1(p):
-# 	'member_designator_list :  member_designator_list comma member_designator'
-
-# def p_member_designator_list_2(p):
-# 	'member_designator_list :  member_designator'
-
-
-
-# def p_member_designator_1(p):
-# 	'member_designator :  member_designator DOTDOT expression'
-
-# def p_member_designator_2(p):
-# 	'member_designator :  expression'
 
 
 
