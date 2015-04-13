@@ -2,7 +2,7 @@ import ply.yacc as yacc
 from lexer import lexer, tokens
 import symTab
 import threeAddrCode
-
+from code_gen import *
 
 def temp_real(a) :
 	if a['type'] == 'real':		# no need to type-convert : already a real
@@ -1531,7 +1531,7 @@ parser = yacc.yacc()
 
 def parseProgram(program):
     parser.parse(program, lexer=lexer)
-    # return ST, TAC, debug
+    # return S_TABLE, TAC, debug
 
 # a function to test the parser
 def testYacc(inputFile):
@@ -1547,4 +1547,6 @@ if __name__ == "__main__":
     TAC = threeAddrCode.ThreeAddrCode(S_TABLE)
     testYacc(inputFile)
     TAC.print_TAC()
-    # S_TABLE.print_temp()
+    S_TABLE.print_temp()
+
+    code_gen(TAC,S_TABLE)

@@ -4,7 +4,6 @@
 # 		self.name = name
 # 		self.size = -1
 # 		self.type = undefined
-import pprint
 
 class Scope:
 	def __init__(self,parent,name):
@@ -60,7 +59,7 @@ class SymTable:
 		self.currentScope = Scope(parent=None,name='root')
 		self.temp_var_count = 0;
 		self.label_count = 0;
-		self.scope_list = {}
+		self.scope_list = {'root':self.currentScope}
 
 	def begin_scope(self,name):
 		self.currentScope = Scope(parent=self.currentScope,name=name)
@@ -81,8 +80,8 @@ class SymTable:
 
 	def print_temp(self):
 		for sc_name in self.scope_list:
-			pprint.pprint(sc_name)
-			pprint.pprint(self.scope_list[sc_name].tempList)
+			print(sc_name)
+			print(self.scope_list[sc_name].tempList)
 
 
 
