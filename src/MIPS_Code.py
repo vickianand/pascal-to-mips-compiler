@@ -46,6 +46,10 @@ class MIPS_Code(object):
 		self.add_line(['sw',reg,  str(curr_temp_details['offset'])+'($sp)' ,''])
 		self.register_descriptor[reg] = None
 
+	def allocate_activation(self,f_name):
+		curr_func_details = self.symTab.scope_list[self.currFunc]
+		self.add_line(['addi','$sp',curr_func_details.width,''])
+
 	def print_code(self):
 		print '.text'
 		for func in self.symTab.scope_list:

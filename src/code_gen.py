@@ -8,11 +8,12 @@ def code_gen(TAC,symTab):
 		if f_name == 'root':
 			#Add space to store the register's mapping
 			M_Code.add_line(['sub', '$sp','$sp',120])
-		else:
-			M_Code.add_line(['sub', '$sp','$sp',4])
+			M_Code.allocate_activation(f_name)
+		# else:
+		# 	M_Code.allocate_activation(f_name)
 		
 		for tac in TAC.code[f_name]:
-			if tac[3] == ':=':
+			if tac[3] == 'int:=' or tac[3] == 'integer:=':
 				r1 = M_Code.get_reg(tac[0],1)
 				if type(tac[1]) is str:
 					r2 = M_Code.get_reg(tac[1],2)
@@ -34,21 +35,21 @@ def code_gen(TAC,symTab):
 					M_Code.add_line(['add',r1,r2,r3])
 				M_Code.flush_reg(r1)
 
-			elif tac[3] == '<':
+			elif tac[3] == 'int<':
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				r3 = M_Code.get_reg(tac[2],3)
 				M_Code.add_line(['slt',r1,r2,r3])
 				M_Code.flush_reg(r1)
 
-			elif tac[3] == '>':
+			elif tac[3] == 'int>':
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				r3 = M_Code.get_reg(tac[2],3)
 				M_Code.add_line(['slt',r1,r3,r2])
 				M_Code.flush_reg(r1)
 
-			elif tac[3] == '<=':
+			elif tac[3] == 'int<=':
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				r3 = M_Code.get_reg(tac[2],3)
@@ -56,7 +57,7 @@ def code_gen(TAC,symTab):
 				M_Code.add_line(['xori',r1,r1,1])
 				M_Code.flush_reg(r1)
 
-			elif tac[3] == '>=':
+			elif tac[3] == 'int>=':
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				r3 = M_Code.get_reg(tac[2],3)
@@ -70,6 +71,8 @@ def code_gen(TAC,symTab):
 
 			elif tac[3] == 'GOTO':
 				M_Code.add_line(['j', tac[0],'',''])
+			else:
+				print tac[3] + "not implemented"
 
 		M_Code.print_code()
 

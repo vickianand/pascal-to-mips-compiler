@@ -885,7 +885,7 @@ def p_closed_for_statement_1(p):
 def p_marker_for_for_branching_1(p):
 	'marker_for_for_branching : '
 	p[0] = {}
-	TAC.emit(p[-5]['t_name'],p[-3]['t_name'],'',p[-4])
+	TAC.emit(p[-5]['t_name'],p[-3]['t_name'],'','int' +p[-4])
 	p[0]['cond_chek_label'] = S_TABLE.new_label()
 	TAC.emit(p[0]['cond_chek_label'],'','','label')
 	p[0]['bool_temp'] = S_TABLE.new_temp(typ='integer')
@@ -963,16 +963,16 @@ def p_assignment_statement_1(p):
 	if (p[1]['type'] != p[3]['type']) :
 		if p[1]['type'] == 'real' and p[3]['type'] == 'integer' :
 			p[0]['type'] = 'VOID'
-			TAC.emit(p[1]['t_name'],temp_real(p[3]),'',p[2])
+			TAC.emit(p[1]['t_name'],temp_real(p[3]),'','real' +p[2])
 		elif p[1]['type'] == 'integer' and p[3]['type'] == 'char' :
 			p[0]['type'] = 'VOID'
-			TAC.emit(p[1]['t_name'],temp_integer(p[3]),'',p[2])
+			TAC.emit(p[1]['t_name'],temp_integer(p[3]),'','int' + p[2])
 		else :
 			p[0]['type'] = 'ERROR'
 			throw_error("type mis-match during assignment : conversion not possible")
 	else:
 		p[0]['type'] = 'VOID'
-		TAC.emit(p[1]['t_name'],p[3]['t_name'],'',p[2])
+		TAC.emit(p[1]['t_name'],p[3]['t_name'],'',p[3]['type']+p[2])
 
 
 
@@ -1166,13 +1166,13 @@ def p_initial_value_1(p):
 def p_direction_1(p):
 	'direction :  RESERVED_TO'
 	p[0] = {}
-	p[0]['relop'] = '<='
+	p[0]['relop'] = 'int<='
 	p[0]['control_op'] = '+'
 
 def p_direction_2(p):
 	'direction :  RESERVED_DOWNTO'
 	p[0] = {}
-	p[0]['relop'] = '>='
+	p[0]['relop'] = 'int>='
 	p[0]['control_op'] = '-'
 
 
@@ -1240,7 +1240,7 @@ def p_simple_expression_2(p):
 		return
 	elif p[2]['name'] == 'or' or p[2]['name'] == 'xor' :	# if its safe to proceed and operator is 'OR' or 'XOR'
 		p[0]['type'] = 'integer'	# then output type must be integer(boolean)
-		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
 	# for other operators we are going to type-cast it into the largest-sized data-type .
 	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
 		p[0]['type'] = 'real'					# real is a larger data-type
@@ -1272,7 +1272,7 @@ def p_term_2(p):
 		return
 	elif p[2]['name'] == 'and' :	# if its safe to proceed and operator is 'AND'
 		p[0]['type'] = 'integer'	# then output type must be integer(boolean)
-		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],p[2]['name'])
+		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
 	# for other operators we are going to type-cast it into the largest-sized data-type .
 	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
 		p[0]['type'] = 'real'					# real is a larger data-type
@@ -1360,13 +1360,13 @@ def p_unsigned_constant_1(p):
 	'unsigned_constant :  unsigned_number'
 	p[0] = p[1]
 	p[0]['t_name'] = S_TABLE.new_temp()
-	TAC.emit(p[0]['t_name'],p[1]['value'],'',':=')
+	TAC.emit(p[0]['t_name'],p[1]['value'],'',p[0]['type']+':=')
 
 def p_unsigned_constant_2(p):
 	'unsigned_constant :  STRING'
 	p[0] = {'value':p[1],'type':'string'}
 	p[0]['t_name'] = S_TABLE.new_temp()
-	TAC.emit(p[0]['t_name'],p[1],'',':=')	# issue: how to get the exact string value ??
+	TAC.emit(p[0]['t_name'],p[1],'','string:=')	# issue: how to get the exact string value ??
 
 def p_unsigned_constant_3(p):
 	'unsigned_constant :  RESERVED_NIL'
