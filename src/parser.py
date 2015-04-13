@@ -407,6 +407,7 @@ def p_procedure_heading_2(p):
 		p[1]['p_st_entry']['param_width'] = p[2]['width']
 		p[1]['p_st_entry']['label'] = S_TABLE.new_label()
 		p[1]['p_st_entry']['arg_type_list'] = p[2]['arg_type_list']
+		p[1]['p_st_entry']['arg_temp_list'] = p[2]['arg_temp_list']
 		TAC.emit(p[1]['p_st_entry']['label'],'','','label')
 
 
@@ -425,6 +426,8 @@ def p_formal_parameter_section_list_1(p):
 	p[0]['type_list'] = p[1]['type_list'] + p[3]['type_list']
 	p[0]['arg_type_list'] = p[1]['arg_type_list'] + p[3]['arg_type_list']
 	p[0]['width'] = p[1]['width'] + p[3]['width']
+	p[0]['arg_temp_list'] = p[1]['arg_temp_list'] + p[3]['arg_temp_list']
+
 	if p[1]['type'] ==  'ERROR' or p[3]['type'] ==  'ERROR':
 		p[0]['type'] = 'ERROR'
 	else:
@@ -458,6 +461,7 @@ def p_value_parameter_specification_1(p):
 	p[0] = {}
 	p[0]['type_list'] = []
 	p[0]['arg_type_list'] = []
+	p[0]['arg_temp_list'] = []
 	p[0]['width'] = 0
 	st_entry = S_TABLE.currentScope.look_up(name=p[3]['name'])
 
@@ -475,9 +479,11 @@ def p_value_parameter_specification_1(p):
 				p[0]['type'] = 'ERROR'
 			else:
 				st_entry = S_TABLE.currentScope.add_id(name=iden)
-				S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['name'],'t_name':S_TABLE.new_temp(name=iden,typ=p[3]['name'],width=type_width,s_entry=st_entry)})
+				nt = S_TABLE.new_temp(name=iden,typ=p[3]['name'],width=type_width,s_entry=st_entry)
+				S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[3]['name'],'t_name':nt})
 				p[0]['type_list'] = p[0]['type_list'] + [p[3]['name']]
 				p[0]['arg_type_list'] = p[0]['arg_type_list'] + ['val']
+				p[0]['arg_temp_list'] = p[0]['arg_temp_list'] + [nt]
 				p[0]['type'] = 'VOID'
 				p[0]['width'] += type_width
 
@@ -488,6 +494,7 @@ def p_variable_parameter_specification_1(p):
 	p[0] = {}
 	p[0]['type_list'] = []
 	p[0]['arg_type_list'] = []
+	p[0]['arg_temp_list'] = []
 	p[0]['width'] = 0
 	st_entry = S_TABLE.currentScope.look_up(name=p[4]['name'])
 	if st_entry['type'] != 'typedef':
@@ -502,9 +509,11 @@ def p_variable_parameter_specification_1(p):
 				p[0]['type'] = 'ERROR'
 			else:
 				st_entry = S_TABLE.currentScope.add_id(name=iden)
-				S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[4]['name'],'t_name':S_TABLE.new_temp(name=iden,typ=p[4]['name'],width=type_width,s_entry=st_entry)})
+				nt = S_TABLE.new_temp(name=iden,typ=p[3]['name'],width=type_width,s_entry=st_entry)
+				S_TABLE.currentScope.update_id(name=iden,id_dict={'type':p[4]['name'],'t_name':nt})
 				p[0]['type_list'] = p[0]['type_list'] + [p[4]['name']]
 				p[0]['arg_type_list'] = p[0]['arg_type_list'] + ['var']
+				p[0]['arg_temp_list'] = p[0]['arg_temp_list'] + [nt]
 				p[0]['type'] = 'VOID'
 				p[0]['width'] += type_width
 
@@ -528,7 +537,7 @@ def p_procedure_identification_1(p):
 		p[0]['type'] = 'ERROR'
 	else :
 		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
-		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'procedure','type_list':[],'arg_type_list':[],'t_name':S_TABLE.new_temp(name=p[2]['name'],width=0,typ='procedure'),'param_width':0})
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'procedure','type_list':[],'arg_type_list':[],'arg_temp_list':[],'t_name':S_TABLE.new_temp(name=p[2]['name'],width=0,typ='procedure'),'param_width':0})
 		p[0]['type'] = 'VOID'
 		p[0]['p_st_entry'] = st_entry
 		S_TABLE.begin_scope(name=p[2]['name'])
@@ -573,11 +582,13 @@ def p_function_heading_1(p):
 	else:
 		st_entry = S_TABLE.currentScope.add_id(name=p[2]['name'])
 		p[0]['label'] = S_TABLE.new_label()
-		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type'],'label':p[0]['label'],'type_list':[],'arg_type_list':[],'t_name':S_TABLE.new_temp(name=p[2]['name'],width=0,s_entry=st_entry),'param_width':0})
+		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type':p[4]['type'],'label':p[0]['label'],'type_list':[],'arg_type_list':[],'arg_temp_list':[],'t_name':S_TABLE.new_temp(name=p[2]['name'],width=0,s_entry=st_entry),'param_width':0})
 		p[0]['type'] = 'VOID'
 		S_TABLE.begin_scope(name=p[2]['name'])
 		TAC.add_func(p[2]['name'])
 		TAC.emit(p[0]['label'],'','','label')
+
+		TAC.emit('','','','FUNC_BEGIN')
 
 def p_function_heading_2(p):
 	'function_heading :  RESERVED_FUNCTION identifier marker_fh formal_parameter_list COLON result_type'
@@ -588,10 +599,12 @@ def p_function_heading_2(p):
 	p[0]['label'] = S_TABLE.new_label()
 	p[3]['f_st_entry']['label'] = p[0]['label']
 	p[3]['f_st_entry']['type_list'] = p[4]['type_list']
+	p[3]['f_st_entry']['arg_temp_list'] = p[4]['arg_temp_list']
 	p[3]['f_st_entry']['arg_type_list'] = p[4]['arg_type_list']
-	p[3]['f_st_entry']['t_name'] = S_TABLE.new_temp(name=p[2]['name'],typ='function',s_entry=p[3]['f_st_entry'],width=0)
+	p[3]['f_st_entry']['t_name'] = S_TABLE.new_temp(name=p[2]['name'],typ='function',s_entry=p[3]['f_st_entry'],width=4)
 	p[3]['f_st_entry']['param_width'] = p[4]['width']
 	TAC.emit(p[0]['label'],'','','label')
+	TAC.emit('','','','FUNC_BEGIN')
 	if p[6]['type'] == 'ERROR' :
 		p[0]['type'] = 'ERROR'
 		return
@@ -614,6 +627,7 @@ def p_marker_fh_1(p):
 		p[0]['f_st_entry'] = st_entry
 		S_TABLE.begin_scope(name=p[-1]['name'])
 		TAC.add_func(p[-1]['name'])
+		TAC.emit('','','','FUNC_BEGIN')
 
 
 def p_result_type_1(p):
@@ -642,7 +656,7 @@ def p_function_identification_1(p):
 		S_TABLE.currentScope.update_id(name=p[2]['name'],id_dict={'type':'function','result_type': 'VOID','type_list':[],'t_name':S_TABLE.new_temp(name=p[2]['name'],typ='function',s_entry=st_entry,width=0),'param_width':0})
 		p[0]['type'] = 'VOID'
 		S_TABLE.begin_scope(name=p[2]['name'])
-		TAC.add_func(p[2]['name'])
+		TAC.add_func(paramsp[2]['name'])
 
 
 def p_function_block_1(p):
@@ -1081,7 +1095,7 @@ def p_procedure_statement_1(p):
 					p[0] = {'type' : 'ERROR'}
 					break
 		elif p[1]['name'].lower() == 'read':
-			for i,param in enumerate(p[2]['list']):
+			for param_type, param in zip(p[2]['type_list'], p[2]['list']):
 				if(param_type == 'integer'):
 					TAC.emit('', param['t_name'],'','READ_INT')
 				elif(param_type == 'real'):
@@ -1105,7 +1119,7 @@ def p_procedure_statement_1(p):
 	else :
 		p[0] = {'type' : 'VOID','t_name':S_TABLE.new_temp(name = p[1]['name'],width=0)}
 		if match_list(p[2]['type_list'],st_entry['type_list']) :
-			TAC.emit('',st_entry['param_width'],'','SET_PARAM_OFFSET_WIDTH')
+			TAC.emit(p[1]['name'],st_entry['param_width'],'','SET_PARAM_OFFSET_WIDTH')
 			for i,param in enumerate(p[2]['list']):
 				if(st_entry['arg_type_list'][i] == 'var'):
 					TAC.emit(param['t_name'],'','','PUSH_VAR_PARAMS')
@@ -1435,11 +1449,15 @@ def p_function_designator_1(p):
 		throw_error('this identifier cannot be used as a function ')
 		p[0] = {'type' : 'ERROR'}
 	else :
-		p[0] = {'type' : st_entry['result_type'],'t_name':S_TABLE.new_temp(name = p[1]['name'],width=0,typ='function',s_entry=st_entry)}
+		rt = S_TABLE.new_temp(name = p[1]['name'],width=4,typ='function',s_entry=st_entry)
+		p[0] = {'type' : st_entry['result_type'],'t_name':rt}
 		if match_list(p[2]['type_list'],st_entry['type_list']):
-			TAC.emit('',st_entry['param_width'],'','SET_PARAM_OFFSET_WIDTH')
-			for params in p[2]['list']:
-				TAC.emit(params['t_name'],'','','PARAMS')
+			TAC.emit(p[1]['name'],st_entry['param_width'],rt,'SET_PARAM_OFFSET_WIDTH')
+			for i,param in enumerate(p[2]['list']):
+				if(st_entry['arg_type_list'][i] == 'var'):
+					TAC.emit(param['t_name'],'','','PUSH_VAR_PARAMS')
+				else:
+					TAC.emit(param['t_name'],'','','PUSH_VAL_PARAMS')
 			TAC.emit(st_entry['label'],'','','CALL_FUNCTION')
 
 

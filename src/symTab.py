@@ -63,7 +63,7 @@ class SymTable:
 
 	def begin_scope(self,name):
 		self.currentScope = Scope(parent=self.currentScope,name=name)
-		self.scope_list['name'] = self.currentScope
+		self.scope_list[name] = self.currentScope
 
 	def end_scope(self):
 		self.currentScope = self.currentScope.parentScope
@@ -82,6 +82,13 @@ class SymTable:
 		for sc_name in self.scope_list:
 			print(sc_name)
 			print(self.scope_list[sc_name].tempList)
+
+	def get_func_entrylist(self,scope):
+		if scope.name != 'root':
+			parent = scope.parentScope
+			return parent.EntryList[scope.name]
+		else :
+			return None
 
 
 

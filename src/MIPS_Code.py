@@ -29,26 +29,98 @@ class MIPS_Code(object):
 	def add_line(self,line):
 		self.code[self.currFunc] += [line]
 
-	def new_func(self,f_name):
-		self.code[f_name] = []
-		self.currFunc = f_name
+	def new_func(self,f_n):
+		# print f_name + " added"
+		self.code[f_n] = []
+		self.currFunc = f_n
 
 	def get_reg(self,temp,arg_num):
 		reg = '$t'+str(arg_num)
 		self.register_descriptor[reg] = temp
+		# print temp
 		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
 		curr_temp_details['reg'] = reg
 		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
 		return reg
 
+	def get_reg_for_func_temp(self,temp,arg_num,func_name):
+		reg = '$t'+str(arg_num)
+		self.register_descriptor[reg] = temp
+		# print temp
+		curr_temp_details = self.symTab.scope_list[func_name].tempList[temp]
+		curr_temp_details['reg'] = reg
+		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+		return reg
+
+	def get_arg_reg(self,temp,arg_num):
+		reg = '$t'+str(arg_num)
+		self.register_descriptor[reg] = temp
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
+		curr_temp_details['reg'] = reg
+		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($fp)' ,''])
+		return reg
+
 	def flush_reg(self,reg):
+		if self.register_descriptor[reg] is None:
+			return
 		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[self.register_descriptor[reg]]
 		self.add_line(['sw',reg,  str(curr_temp_details['offset'])+'($sp)' ,''])
 		self.register_descriptor[reg] = None
 
-	def allocate_activation(self,f_name):
+	def flush_reg_func(self,reg,func_name):
+		if self.register_descriptor[reg] is None:
+			return
+		curr_temp_details = self.symTab.scope_list[func_name].tempList[self.register_descriptor[reg]]
+		self.add_line(['sw',reg,  str(curr_temp_details['offset'])+'($sp)' ,''])
+		self.register_descriptor[reg] = None
+
+
+	def allocate_activation(self):
 		curr_func_details = self.symTab.scope_list[self.currFunc]
-		self.add_line(['addi','$sp',curr_func_details.width,''])
+		self.add_line(['move','$fp','$sp',''])
+		self.add_line(['sub','$sp',curr_func_details.width+32,''])
+
+	def set_return_val_addr(self,func_name,ret_temp):
+		curr_func_details = self.symTab.scope_list[func_name]
+		ret_temp_details = curr_func_details.tempList[ret_temp]
+		self.flush_reg('$t0')
+		self.add_line(['addi','$t0','$fp',ret_temp_details['offset']])
+		self.add_line(['sw','$t0','-12($fp)',''])
+
+	def function_return_handler(self,func_name):
+		curr_func_details = self.symTab.scope_list[func_name]
+		curr_func_entry_list = self.symTab.get_func_entrylist(curr_func_details)
+		self.flush_reg('$t1')
+		r1 = self.get_reg(curr_func_entry_list['t_name'],1)
+		self.flush_reg('$t0')
+		self.add_line(['lw','$t0','-12($fp)',''])
+		self.add_line(['sw',r1,'0($t0)',''])
+		self.add_line(['lw','$ra','-8($fp)',''])
+		self.add_line(['move','$sp','$fp',''])
+		self.add_line(['lw','$fp','-4($sp)',''])
+		self.add_line(['j','$ra','',''])
+		
+
+
+	def function_caller_handler(self,callee_name,counter,tac_params,tac_param_type,width,label,ret_temp):
+		curr_func_details = self.symTab.scope_list[callee_name]
+		self.add_line(['sw','$fp','-4($sp)',''])
+		self.add_line(['move','$fp','$sp',''])
+		self.add_line(['sub','$sp','$sp',curr_func_details.width+32])
+
+		curr_func_st_entry = self.symTab.get_func_entrylist(curr_func_details)
+		
+		self.set_return_val_addr(self.currFunc,ret_temp)
+
+		for i in range(counter):
+			r1 = self.get_reg_for_func_temp(curr_func_st_entry['arg_temp_list'][i],1,callee_name)
+			r2 = self.get_arg_reg(tac_params[i],2)
+			self.add_line(['move',r1,r2,''])
+			self.flush_reg_func(r1,callee_name)
+		self.add_line(['jal',label,'',''])
+			
+
+
 
 	def print_code(self):
 		print '.text'

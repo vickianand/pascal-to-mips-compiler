@@ -2,13 +2,16 @@ from MIPS_Code import *
 
 def code_gen(TAC,symTab):
 	M_Code = MIPS_Code(TAC,symTab)
+	# for key in TAC.code:
+	# 	print key +" found."
 	for f_name in TAC.code:
+		# print f_name
 		M_Code.new_func(f_name)
-		
+		# print f_name
 		if f_name == 'root':
 			#Add space to store the register's mapping
 			M_Code.add_line(['sub', '$sp','$sp',120])
-			M_Code.allocate_activation(f_name)
+			M_Code.allocate_activation()
 		# else:
 		# 	M_Code.allocate_activation(f_name)
 		
@@ -71,9 +74,36 @@ def code_gen(TAC,symTab):
 
 			elif tac[3] == 'GOTO':
 				M_Code.add_line(['j', tac[0],'',''])
-			else:
-				print tac[3] + "not implemented"
 
-		M_Code.print_code()
+			elif tac[3] == 'SET_PARAM_OFFSET_WIDTH':
+				calee_name = tac[0]
+				counter = 0
+				tac_params = []
+				tac_param_type = []
+				width = tac[1]
+				ret_temp = tac[2]
+
+			elif tac[3] ==  'PUSH_VAR_PARAMS':
+				counter += 1
+				tac_param_type += ['var'] 
+				tac_params += [tac[0]]
+
+			elif tac[3] ==  'PUSH_VAL_PARAMS':
+				tac_param_type += ['val'] 
+				tac_params += [tac[0]]
+				counter += 1
+
+			elif tac[3] == 'CALL_FUNCTION':
+				M_Code.function_caller_handler(calee_name,counter,tac_params,tac_param_type,width,tac[0],ret_temp)
+
+			elif tac[3] == 'FUNC_RETURN':
+				M_Code.function_return_handler(f_name)
+
+			elif tac[3] == 'FUNC_BEGIN':
+				M_Code.add_line(['sw','$ra','-8($fp)',''])
+			else:
+				print tac[3] + " not implemented"
+
+	M_Code.print_code()
 
 		
