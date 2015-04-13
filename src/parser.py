@@ -1067,8 +1067,38 @@ def p_procedure_statement_1(p):
 	'procedure_statement :  identifier params'
 	st_entry = S_TABLE.currentScope.look_up(name = p[1]['name'])
 	if(st_entry == None) :
-		throw_error("procedure yet not defined")
-		p[0] = {'type' : 'ERROR'}
+		
+		if p[1]['name'].lower() == 'write':
+			for param_type, param in zip(p[2]['type_list'], p[2]['list']):
+				if(param_type == 'integer'):
+					TAC.emit('', param['t_name'],'','WRITE_INT')
+				elif(param_type == 'real'):
+					TAC.emit('', param['t_name'],'','WRITE_REAL')
+				elif(param_type == 'string'):
+					TAC.emit('', param['t_name'],'','WRITE_STRING')
+				else :
+					throw_error("Currently this type is not supported with write() function. You can request for support.")
+					p[0] = {'type' : 'ERROR'}
+					break
+		elif p[1]['name'].lower() == 'read':
+			for i,param in enumerate(p[2]['list']):
+				if(param_type == 'integer'):
+					TAC.emit('', param['t_name'],'','READ_INT')
+				elif(param_type == 'real'):
+					TAC.emit('', param['t_name'],'','READ_REAL')
+				elif(param_type == 'string'):
+					TAC.emit('', param['t_name'],'','READ_STRING')
+				else :
+					throw_error("Currently this type is not supported with read() function. You can request for support.")
+					p[0] = {'type' : 'ERROR'}
+					break
+		else:
+			throw_error("procedure yet not defined")
+			p[0] = {'type' : 'ERROR'}
+
+		if p[0] != {'type' : 'ERROR'} :
+			p[0] = {'type' : 'ERROR'}
+			
 	elif st_entry['type'] != 'procedure' :
 		throw_error('this identifier cannot be used as a procedure ')
 		p[0] = {'type' : 'ERROR'}
@@ -1076,11 +1106,11 @@ def p_procedure_statement_1(p):
 		p[0] = {'type' : 'VOID','t_name':S_TABLE.new_temp(name = p[1]['name'],width=0)}
 		if match_list(p[2]['type_list'],st_entry['type_list']) :
 			TAC.emit('',st_entry['param_width'],'','SET_PARAM_OFFSET_WIDTH')
-			for i,params in enumerate(p[2]['list']):
+			for i,param in enumerate(p[2]['list']):
 				if(st_entry['arg_type_list'][i] == 'var'):
-					TAC.emit(params['t_name'],'','','PUSH_VAR_PARAMS')
+					TAC.emit(param['t_name'],'','','PUSH_VAR_PARAMS')
 				else:
-					TAC.emit(params['t_name'],'','','PUSH_VAL_PARAMS')
+					TAC.emit(param['t_name'],'','','PUSH_VAL_PARAMS')
 			TAC.emit(st_entry['label'],'','','CALL_PROCEDURE')
 
 def p_procedure_statement_2(p):
