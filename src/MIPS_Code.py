@@ -43,6 +43,14 @@ class MIPS_Code(object):
 		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
 		return reg
 
+	def get_f_reg(self,temp,arg_num):
+		reg = '$f'+str(arg_num)
+		self.register_descriptor[reg] = temp
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
+		curr_temp_details['reg'] = reg
+		self.add_line(['l.s',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+		return reg
+
 	def get_reg_for_func_temp(self,temp,arg_num,func_name):
 		reg = '$t'+str(arg_num)
 		self.register_descriptor[reg] = temp
@@ -60,11 +68,30 @@ class MIPS_Code(object):
 		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($fp)' ,''])
 		return reg
 
+	def load_temp_in_reg(self, temp, reg) :
+		self.register_descriptor[reg] = temp
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
+		curr_temp_details['reg'] = reg
+		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+
+	def load_temp_in_f_reg(self, temp, reg) :
+		self.register_descriptor[reg] = temp
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
+		curr_temp_details['reg'] = reg
+		self.add_line(['l.s',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+
 	def flush_reg(self,reg):
 		if self.register_descriptor[reg] is None:
 			return
 		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[self.register_descriptor[reg]]
 		self.add_line(['sw',reg,  str(curr_temp_details['offset'])+'($sp)' ,''])
+		self.register_descriptor[reg] = None
+
+	def flush_f_reg(self,reg):
+		if self.register_descriptor[reg] is None:
+			return
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[self.register_descriptor[reg]]
+		self.add_line(['s.s',reg,  str(curr_temp_details['offset'])+'($sp)' ,''])
 		self.register_descriptor[reg] = None
 
 	def flush_reg_func(self,reg,func_name):
@@ -122,17 +149,28 @@ class MIPS_Code(object):
 
 
 
+	def annotate_code(self, str) :
+		annotate = True
+		if annotate :
+			self.add_line(['#', str, '', ''])
+
 	def print_code(self):
-		print '.text'
+		print_str =  '.text'+'\n'
 		for func in self.symTab.scope_list:
 			if func == 'root':
-				print 'main:'
+				print_str += 'main:'+'\n'
 			for code in self.code[func]:
-				print str(code[0]) + ' ' + str(code[1]) + ' ' + str(code[2]) + ' ' + str(code[3])
+				print_str += str(code[0]) + ' ' + str(code[1]) + ' ' + str(code[2]) + ' ' + str(code[3])+'\n'
 				# print code
 			if func == 'root':
-				print 'li $v0, 10'
-				print 'syscall'
+				print_str += 'li $v0, 10'+'\n'
+				print_str += 'syscall'+'\n'
+
+		print print_str
+
+		with open('temp.asm', 'w') as f:
+			f.write(print_str)
+		return
 
 
 

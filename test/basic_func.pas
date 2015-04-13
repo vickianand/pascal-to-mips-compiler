@@ -12,4 +12,5 @@ var
 begin
     i := 10;
     out := basic(i) + basic(i+1);
+    write(out, i);
 end.

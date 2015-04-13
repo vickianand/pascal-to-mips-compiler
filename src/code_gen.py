@@ -38,6 +38,45 @@ def code_gen(TAC,symTab):
 					M_Code.add_line(['add',r1,r2,r3])
 				M_Code.flush_reg(r1)
 
+			elif tac[3] == 'int-':
+				M_Code.annotate_code('generating code for : '+tac[3])
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				if type(tac[2]) is int:
+					M_Code.add_line(['sub',r1,r2,tac[2]])
+				else:
+					r3 = M_Code.get_reg(tac[2],3)
+					M_Code.add_line(['sub',r1,r2,r3])
+				M_Code.flush_reg(r1)
+				M_Code.annotate_code('===========================================')
+
+
+			elif tac[3] == 'real+':
+				M_Code.annotate_code('generating code for : '+tac[3])
+				r1 = M_Code.get_f_reg(tac[0],1)
+				r2 = M_Code.get_f_reg(tac[1],2)
+				if type(tac[2]) is float:
+					M_Code.add_line(['li.s', '$f30', tac[2]])	# don't use $f30 anywhere
+					M_Code.add_line(['add.s',r1,r2,'$f30'])		# don't use $f30 anywhere
+				else:
+					r3 = M_Code.get_reg(tac[2],3)
+					M_Code.add_line(['add.s',r1,r2,r3])
+				M_Code.flush_reg(r1)
+				M_Code.annotate_code('===========================================')
+
+			elif tac[3] == 'real-':
+				M_Code.annotate_code('generating code for : '+tac[3])
+				r1 = M_Code.get_f_reg(tac[0],1)
+				r2 = M_Code.get_f_reg(tac[1],2)
+				if type(tac[2]) is float:
+					M_Code.add_line(['li.s', '$f30', tac[2]])	# don't use $f30 anywhere
+					M_Code.add_line(['sub.s',r1,r2,'$f30'])		# don't use $f30 anywhere
+				else:
+					r3 = M_Code.get_f_reg(tac[2],3)
+					M_Code.add_line(['sub.s',r1,r2,r3])
+				M_Code.flush_f_reg(r1)
+				M_Code.annotate_code('===========================================')
+
 			elif tac[3] == 'int<':
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
@@ -60,6 +99,17 @@ def code_gen(TAC,symTab):
 				M_Code.add_line(['xori',r1,r1,1])
 				M_Code.flush_reg(r1)
 
+			elif tac[3] == 'real:=' :
+				M_Code.annotate_code('generating code for : '+tac[3])
+				r1 = M_Code.get_f_reg(tac[0],1)
+				if type(tac[1]) is str:
+					r2 = M_Code.get_f_reg(tac[1],2)
+					M_Code.add_line(['mov.s',r1,r2,''])
+				else:
+					M_Code.add_line(['li.s',r1,tac[1],''])
+				M_Code.flush_f_reg(r1)
+				M_Code.annotate_code('===========================================')
+
 			elif tac[3] == 'int>=':
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
@@ -74,6 +124,44 @@ def code_gen(TAC,symTab):
 
 			elif tac[3] == 'GOTO':
 				M_Code.add_line(['j', tac[0],'',''])
+
+
+
+			elif tac[3] == 'WRITE_INT' :
+				M_Code.annotate_code('generating code for : '+tac[3])
+				M_Code.add_line(['li', '$v0', '1', ''])
+				M_Code.load_temp_in_reg(tac[1], '$a0')
+				M_Code.add_line(['syscall', '', '', ''])
+				M_Code.annotate_code('===========================================')
+
+			elif tac[3] == 'READ_INT' :
+				M_Code.annotate_code('generating code for : '+tac[3])
+				M_Code.add_line(['li', '$v0', '5', ''])
+				M_Code.add_line(['syscall', '', '', ''])
+				r1 = M_Code.get_reg(tac[1],1)
+				r2 = '$v0'
+				M_Code.add_line(['move',r1,r2,''])
+				M_Code.flush_reg(r1)
+				M_Code.annotate_code('===========================================')
+
+			elif tac[3] == 'WRITE_REAL' :
+				M_Code.annotate_code('generating code for : '+tac[3])
+				M_Code.add_line(['li', '$v0', '2', ''])
+				M_Code.load_temp_in_f_reg(tac[1], '$f12')
+				M_Code.add_line(['syscall', '', '', ''])
+				M_Code.annotate_code('===========================================')
+
+			elif tac[3] == 'READ_REAL' :
+				M_Code.annotate_code('generating code for : '+tac[3])
+				M_Code.add_line(['li', '$v0', '6', ''])
+				M_Code.add_line(['syscall', '', '', ''])
+				r1 = M_Code.get_f_reg(tac[1],1)
+				r2 = '$f0'
+				M_Code.add_line(['mov.s',r1,r2,''])
+				M_Code.flush_f_reg(r1)
+				M_Code.annotate_code('===========================================')
+
+
 
 			elif tac[3] == 'SET_PARAM_OFFSET_WIDTH':
 				calee_name = tac[0]
