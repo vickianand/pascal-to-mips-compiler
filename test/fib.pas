@@ -14,7 +14,9 @@ var
 
 begin
     // for i := 1 to 16 do
-        write(fib(11));
+        read(i);
+        out := fib(i);
+        write(out*2);
         // out := fib(i);
     // write('...');
     // out := -111;
