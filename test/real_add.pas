@@ -1,4 +1,5 @@
 program real_add;
+
 var
     i:integer;
     out : integer;
@@ -7,6 +8,9 @@ var
 
 begin
 	read(c);
-    writeln(c);
-    writeln(42 / 12)
+	writeln('\n');
+	i := c;
+    writeln(i);
+    writeln('c');
+    writeln(12 = 12);
 end.

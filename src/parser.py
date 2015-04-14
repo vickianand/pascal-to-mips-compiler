@@ -15,7 +15,8 @@ def temp_real(a) :
 	elif a['type'] == 'char':
 		temp_t = S_TABLE.new_temp(typ='real',width=4)
 		# set appropriate offset and width here
-		TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_REAL')
+		# TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_REAL')
+		TAC.emit(temp_t, a['t_name'], '', 'INT_TO_REAL')
 		return temp_t
 
 	else :
@@ -27,10 +28,11 @@ def temp_integer(a) :
 	if a['type'] == 'integer' :		# if already of integer-type then nothing to do
 		return a['t_name']
 	elif a['type'] == 'char':
-		temp_t = S_TABLE.new_temp(typ='integer',width=4)
-		# set appropriate offset and width here
-		TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_INT')
-		return temp_t
+		return a['t_name']
+		# temp_t = S_TABLE.new_temp(typ='integer',width=4)
+		# # set appropriate offset and width here
+		# TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_INT')
+		# return temp_t
 	else :
 		error_str = "type-conversion from "+a['type']+"-type to real-type not possible"
 		throw_error(error_st)
@@ -1284,7 +1286,7 @@ def p_expression_2(p):
 		error_st = "string type cannot be used with "+p[3]['name']+" relational-operator"
 		throw_error(error_st)
 	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
-		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'real'+p[2]['name'])
+		TAC.emit(p[0]['t_name'], temp_real(p[1]), temp_real(p[3]),'real'+p[2]['name'])
 	else :
 		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
 	p[0]['type'] = 'integer' 	# for us integer is boolean
@@ -1432,9 +1434,15 @@ def p_unsigned_constant_1(p):
 
 def p_unsigned_constant_2(p):
 	'unsigned_constant :  STRING'
-	p[0] = {'value':p[1],'type':'string'}
-	p[0]['t_name'] = S_TABLE.new_temp()
-	TAC.emit(p[0]['t_name'],p[1],'','string:=')	# issue: how to get the exact string value ??
+	# p[1] = p[1].rstrip('\'').lstrip('\'')
+	if len(p[1]) == 3 or (len(p[1]) == 4 and p[1][1] == '\\') :
+		p[0] = {'value':p[1],'type':'char'}
+		p[0]['t_name'] = S_TABLE.new_temp()
+		TAC.emit(p[0]['t_name'],p[1],'','char:=')	# issue: how to get the exact string value ??
+	else :
+		p[0] = {'value':p[1],'type':'string'}
+		p[0]['t_name'] = S_TABLE.new_temp()
+		TAC.emit(p[0]['t_name'],p[1],'','string:=')	# issue: how to get the exact string value ??
 
 def p_unsigned_constant_3(p):
 	'unsigned_constant :  RESERVED_NIL'

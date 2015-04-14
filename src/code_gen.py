@@ -19,14 +19,16 @@ def code_gen(TAC,symTab):
 
 			M_Code.annotate_code('generating code for : '+tac[3])
 			# ******************** addops *************************
-			if tac[3] == 'int:=' or tac[3] == 'integer:=':
+			if tac[3] == 'int:=' or tac[3] == 'integer:=' or tac[3] == 'char:=' :
 				r1 = M_Code.get_reg(tac[0],1)
-				if type(tac[1]) is str:
+				if type(tac[1]) is str and tac[1][0] == 't' :
 					r2 = M_Code.get_reg(tac[1],2)
 					M_Code.add_line(['move',r1,r2,''])
 				else:
-					M_Code.add_line(['li',r1,tac[1],''])
+					M_Code.add_line(['li',r1, tac[1],''])
 				M_Code.flush_reg(r1)
+
+
 
 			elif tac[3] == 'label':
 				M_Code.add_line([tac[0], ':','',''])
@@ -160,6 +162,22 @@ def code_gen(TAC,symTab):
 				M_Code.add_line(['sle',r1,r3,r2])
 				M_Code.add_line(['xori',r1,r1,1])
 				M_Code.flush_reg(r1)
+
+			elif tac[3] == 'int=':
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				r3 = M_Code.get_reg(tac[2],3)
+				M_Code.add_line(['seq',r1,r2,r3])
+				M_Code.flush_reg(r1)
+
+			elif tac[3] == 'int<>':
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				r3 = M_Code.get_reg(tac[2],3)
+				M_Code.add_line(['sneq',r1,r2,r3])
+				M_Code.flush_reg(r1)
+
+			# ******************** branchs and jumps *************************
 
 			elif tac[3] == 'IF_FALSE_GOTO':
 				r1 = M_Code.get_reg(tac[1],1)
