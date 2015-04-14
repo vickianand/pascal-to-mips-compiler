@@ -28,7 +28,17 @@ def code_gen(TAC,symTab):
 					M_Code.add_line(['li',r1, tac[1],''])
 				M_Code.flush_reg(r1)
 
+			elif tac[3] == 'string:=' and tac[1][0] == '\'':
+				M_Code.add_to_data(tac[0],': .asciiz "'+tac[1][1:-1]+ '"')
+				r1 = M_Code.get_reg(tac[0],1)
+				M_Code.add_line(['la',r1,tac[0],''])
+				M_Code.flush_reg(r1)
 
+			elif tac[3] == 'string:=' and tac[1][0] == 't':
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				M_Code.add_line(['move',r1,r2,''])
+				M_Code.flush_reg(r1)
 
 			elif tac[3] == 'label':
 				M_Code.add_line([tac[0], ':','',''])
@@ -244,7 +254,10 @@ def code_gen(TAC,symTab):
 				M_Code.add_line(['move',r1,r2,''])
 				M_Code.flush_reg(r1)
 
-
+			elif tac[3] == 'WRITE_STRING' :
+				M_Code.add_line(['li', '$v0', '4', ''])
+				M_Code.load_temp_in_reg(tac[1], '$a0')
+				M_Code.add_line(['syscall', '', '', ''])
 			# ******************** function-handling *************************
 
 

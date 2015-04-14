@@ -4,6 +4,7 @@ class MIPS_Code(object):
 		self.TAC = TAC
 		self.symTab = symTab
 		self.code = {}
+		self.data = []
 		self.currFunc = ''
 		self.register_descriptor = {
 		'$t0' : None, 
@@ -28,6 +29,8 @@ class MIPS_Code(object):
 		self.free_regs = [register  for register in self.register_descriptor]
 		self.busy_regs = []
 
+	def add_to_data(self,temp,data):
+		self.data += [temp + data]
 
 	def add_line(self,line):
 		self.code[self.currFunc] += [line]
@@ -208,6 +211,10 @@ class MIPS_Code(object):
 				print_str += 'li $v0, 10'+'\n'
 				print_str += 'syscall'+'\n'
 
+		if len(self.data) > 0:
+			print_str += '.data'+'\n'
+			for dat in self.data:
+				print_str += dat + '\n'
 
 		# print_str += '.data'+'/n'
 		# print_str += 'space: .asciiz " "'

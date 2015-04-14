@@ -4,18 +4,20 @@ program array_simple;
 var
 	A: Array[0..9] of Integer;
 	I,J : Integer;
+	st : string;
 begin
 	I := 1;
-	For J:=0 to 9 do
-	begin
-		A[J] :=  J+1;
-	end;
+	st := 'pqrst';
+	// For J:=0 to 9 do
+	// begin
+	// 	A[J] :=  J+1;
+	// end;
 
-	For J:=0 to 9 do
-	begin
-		write(A[J]);
-		// A[J] := J;
-	end;
+	// For J:=0 to 9 do
+	// begin
+	// 	write(A[J]);
+	// 	// A[J] := J;
+	// end;
 end.
 
 

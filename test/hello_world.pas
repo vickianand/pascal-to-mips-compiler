@@ -1,7 +1,14 @@
 program Hello_World;
 
+var
+   st1,st2,st3: string;
 
 Begin
-	Write('Hello');
-	Write (24 xor 8);
+	st1 := 'hello';
+	st2 := 'world';
+	write(st1);
+	write('\n');
+	write(st2);
+	st3 := st2;
+	write(st3);
 End.
