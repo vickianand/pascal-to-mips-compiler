@@ -208,6 +208,9 @@ class MIPS_Code(object):
 				print_str += 'li $v0, 10'+'\n'
 				print_str += 'syscall'+'\n'
 
+
+		# print_str += '.data'+'/n'
+		# print_str += 'space: .asciiz " "'
 		print print_str
 
 		with open('temp.asm', 'w') as f:

@@ -59,9 +59,9 @@ def code_gen(TAC,symTab):
 					M_Code.add_line(['li.s', '$f30', tac[2]])	# don't use $f30 anywhere
 					M_Code.add_line(['add.s',r1,r2,'$f30'])		# don't use $f30 anywhere
 				else:
-					r3 = M_Code.get_reg(tac[2],3)
+					r3 = M_Code.get_f_reg(tac[2],3)
 					M_Code.add_line(['add.s',r1,r2,r3])
-				M_Code.flush_reg(r1)
+				M_Code.flush_f_reg(r1)
 
 			elif tac[3] == 'real-':
 				r1 = M_Code.get_f_reg(tac[0],1)
@@ -81,8 +81,8 @@ def code_gen(TAC,symTab):
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				if type(tac[2]) is int :
-					M_Code.flush_reg('$s7')						# be careful!! using $7 forcibly.
-					M_Code.add_line(['li', '$s7', tac[2], ''])	# be careful!! using $7 forcibly.
+					M_Code.flush_reg('$s7')						# be careful!! using $s7 forcibly.
+					M_Code.add_line(['li', '$s7', tac[2], ''])	# be careful!! using $s7 forcibly.
 					r3 = '$s7'
 				else :
 					r3 = M_Code.get_reg(tac[2],3)
@@ -90,6 +90,35 @@ def code_gen(TAC,symTab):
 				M_Code.add_line(['mflo', r1, '', ''])
 				M_Code.flush_reg(r1)
 
+			elif tac[3] == 'intdiv' :
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				if type(tac[2]) is int :
+					r3 = tac[2]
+				else :
+					r3 = M_Code.get_reg(tac[2],3)
+				M_Code.add_line(['div', r1, r2, r3])
+				M_Code.flush_reg(r1)
+
+			elif tac[3] == 'intmod' :
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				if type(tac[2]) is int :
+					r3 = tac[2]
+				else :
+					r3 = M_Code.get_reg(tac[2],3)
+				M_Code.add_line(['rem', r1, r2, r3])
+				M_Code.flush_reg(r1)
+
+			elif tac[3] == '/' :
+				r1 = M_Code.get_f_reg(tac[0],1)
+				r2 = M_Code.get_f_reg(tac[1],2)
+				if (type(tac[2]) is float) or (type(tac[2]) is int) :
+					r3 = tac[2]
+				else :
+					r3 = M_Code.get_f_reg(tac[2],3)
+				M_Code.add_line(['div.s', r1, r2, r3])
+				M_Code.flush_f_reg(r1)
 
 
 			# ******************** relops *************************
@@ -140,6 +169,23 @@ def code_gen(TAC,symTab):
 				M_Code.add_line(['j', tac[0],'',''])
 
 
+			# ******************** type_conversions *************************
+
+
+			elif tac[3] == 'INT_TO_REAL' :
+				r1 = M_Code.get_f_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				M_Code.add_line(['mtc1', r2, r1, ''])
+				M_Code.add_line(['cvt.s.w', r1, r1, ''])
+				M_Code.flush_f_reg(r1)
+
+
+			# ******************** library-supports *************************
+
+			elif tac[3] == 'WRITE_NL' :
+				M_Code.add_line(['li', '$v0', '11', ''])
+				M_Code.add_line(['li', '$a0', '10', ''])
+				M_Code.add_line(['syscall', '', '', ''])
 
 			elif tac[3] == 'WRITE_INT' :
 				M_Code.add_line(['li', '$v0', '1', ''])
@@ -167,6 +213,21 @@ def code_gen(TAC,symTab):
 				M_Code.add_line(['mov.s',r1,r2,''])
 				M_Code.flush_f_reg(r1)
 
+			elif tac[3] == 'WRITE_CHAR' :
+				M_Code.add_line(['li', '$v0', '11', ''])
+				M_Code.load_temp_in_reg(tac[1], '$a0')
+				M_Code.add_line(['syscall', '', '', ''])
+
+			elif tac[3] == 'READ_CHAR' :
+				M_Code.add_line(['li', '$v0', '12', ''])
+				M_Code.add_line(['syscall', '', '', ''])
+				r1 = M_Code.get_reg(tac[1],1)
+				r2 = '$v0'
+				M_Code.add_line(['move',r1,r2,''])
+				M_Code.flush_reg(r1)
+
+
+			# ******************** function-handling *************************
 
 
 			elif tac[3] == 'SET_PARAM_OFFSET_WIDTH':
@@ -195,6 +256,10 @@ def code_gen(TAC,symTab):
 
 			elif tac[3] == 'FUNC_BEGIN':
 				M_Code.add_line(['sw','$ra','-8($fp)',''])
+
+
+			# ******************** array-handling *************************
+
 
 			elif tac[3] == 'ARRAY_MEM_ACCESS':
 				r1 = M_Code.get_reg_array_access(tac[0],1)

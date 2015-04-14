@@ -9,7 +9,7 @@ class Scope:
 	def __init__(self,parent,name):
 		self.EntryList = {'integer':{'type':'typedef', 'width': 4},
 							'real':{'type':'typedef', 'width': 4},
-							'char':{'type':'typedef', 'width': 1},
+							'char':{'type':'typedef', 'width': 4},
 							'string':{'type':'typedef', 'width': 4}
 						} # include boolean, long , float etc.
 		self.tempList = {}

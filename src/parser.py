@@ -8,12 +8,12 @@ def temp_real(a) :
 	if a['type'] == 'real':		# no need to type-convert : already a real
 		return a['t_name']
 	elif a['type'] == 'integer':
-		temp_t = S_TABLE.new_temp(typ='integer',width=4)
+		temp_t = S_TABLE.new_temp(typ='real',width=4)
 		# set appropriate offset and width here
 		TAC.emit(temp_t, a['t_name'], '', 'INT_TO_REAL')
 		return temp_t
 	elif a['type'] == 'char':
-		temp_t = S_TABLE.new_temp(typ='char',width=1)
+		temp_t = S_TABLE.new_temp(typ='real',width=4)
 		# set appropriate offset and width here
 		TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_REAL')
 		return temp_t
@@ -27,7 +27,7 @@ def temp_integer(a) :
 	if a['type'] == 'integer' :		# if already of integer-type then nothing to do
 		return a['t_name']
 	elif a['type'] == 'char':
-		temp_t = S_TABLE.new_temp(typ='char',width=1)
+		temp_t = S_TABLE.new_temp(typ='integer',width=4)
 		# set appropriate offset and width here
 		TAC.emit(temp_t, a['t_name'], '', 'CHAR_TO_INT')
 		return temp_t
@@ -1092,10 +1092,27 @@ def p_procedure_statement_1(p):
 					TAC.emit('', param['t_name'],'','WRITE_REAL')
 				elif(param_type == 'string'):
 					TAC.emit('', param['t_name'],'','WRITE_STRING')
+				elif(param_type == 'char'):
+					TAC.emit('', param['t_name'],'','WRITE_CHAR')
 				else :
 					throw_error("Currently this type is not supported with write() function. You can request for support.")
 					p[0] = {'type' : 'ERROR'}
 					break
+		elif p[1]['name'].lower() == 'writeln':
+			for param_type, param in zip(p[2]['type_list'], p[2]['list']):
+				if(param_type == 'integer'):
+					TAC.emit('', param['t_name'],'','WRITE_INT')
+				elif(param_type == 'real'):
+					TAC.emit('', param['t_name'],'','WRITE_REAL')
+				elif(param_type == 'string'):
+					TAC.emit('', param['t_name'],'','WRITE_STRING')
+				elif(param_type == 'char'):
+					TAC.emit('', param['t_name'],'','WRITE_CHAR')
+				else :
+					throw_error("Currently this type is not supported with write() function. You can request for support.")
+					p[0] = {'type' : 'ERROR'}
+					break
+			TAC.emit('', '', '', 'WRITE_NL')
 		elif p[1]['name'].lower() == 'read':
 			for param_type, param in zip(p[2]['type_list'], p[2]['list']):
 				if(param_type == 'integer'):
@@ -1104,6 +1121,8 @@ def p_procedure_statement_1(p):
 					TAC.emit('', param['t_name'],'','READ_REAL')
 				elif(param_type == 'string'):
 					TAC.emit('', param['t_name'],'','READ_STRING')
+				elif(param_type == 'char'):
+					TAC.emit('', param['t_name'],'','READ_CHAR')
 				else :
 					throw_error("Currently this type is not supported with read() function. You can request for support.")
 					p[0] = {'type' : 'ERROR'}
@@ -1319,6 +1338,9 @@ def p_term_2(p):
 	elif p[2]['name'] == 'and' :	# if its safe to proceed and operator is 'AND'
 		p[0]['type'] = 'integer'	# then output type must be integer(boolean)
 		TAC.emit(p[0]['t_name'],p[1]['t_name'],p[3]['t_name'],'int'+p[2]['name'])
+	elif p[2]['name'] == '/' :	# if the operation is '/'
+		p[0]['type'] = 'real'	# then output type must always be of 'real' type
+		TAC.emit(p[0]['t_name'], temp_real(p[1]), temp_real(p[3]),p[2]['name'])
 	# for other operators we are going to type-cast it into the largest-sized data-type .
 	elif p[1]['type'] == 'real' or p[3]['type'] == 'real' :
 		p[0]['type'] = 'real'					# real is a larger data-type
