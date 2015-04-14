@@ -89,17 +89,26 @@ def code_gen(TAC,symTab):
 
 			# ******************** mulops *************************
 
+			elif tac[3] == 'real*':
+				r1 = M_Code.get_f_reg(tac[0],1)
+				r2 = M_Code.get_f_reg(tac[1],2)
+				if type(tac[2]) is int or type(tac[2]) is float :
+					r3 = tac[2]
+				else :
+					r3 = M_Code.get_f_reg(tac[2],3)
+				M_Code.add_line(['mul.s', r1, r2, r3])
+				# M_Code.add_line(['mflo', r1, '', ''])
+				M_Code.flush_f_reg(r1)
+
 			elif tac[3] == 'int*':
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				if type(tac[2]) is int :
-					M_Code.flush_reg('$s7')						# be careful!! using $s7 forcibly.
-					M_Code.add_line(['li', '$s7', tac[2], ''])	# be careful!! using $s7 forcibly.
-					r3 = '$s7'
+					r3 = tac[2]
 				else :
 					r3 = M_Code.get_reg(tac[2],3)
-				M_Code.add_line(['mult', r2, r3, ''])
-				M_Code.add_line(['mflo', r1, '', ''])
+				M_Code.add_line(['mul', r1, r2, r3])
+				# M_Code.add_line(['mflo', r1, '', ''])
 				M_Code.flush_reg(r1)
 
 			elif tac[3] == 'intdiv' :
@@ -192,6 +201,10 @@ def code_gen(TAC,symTab):
 			elif tac[3] == 'IF_FALSE_GOTO':
 				r1 = M_Code.get_reg(tac[1],1)
 				M_Code.add_line(['beqz',r1,tac[0],''])
+
+			elif tac[3] == 'IF_TRUE_GOTO':
+				r1 = M_Code.get_reg(tac[1],1)
+				M_Code.add_line(['bne',r1, '$zero', tac[0]])
 
 			elif tac[3] == 'GOTO':
 				M_Code.add_line(['j', tac[0],'',''])
@@ -298,6 +311,18 @@ def code_gen(TAC,symTab):
 				r3 = M_Code.get_addr_reg(tac[1],3)
 				M_Code.add_line(['add',r1,r2,r3])
 				M_Code.flush_reg_array_access(r1)
+
+
+
+
+
+# vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+			
+
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 
 
 			else:

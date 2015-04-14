@@ -1626,7 +1626,7 @@ if __name__ == "__main__":
     S_TABLE = symTab.SymTable()
     TAC = threeAddrCode.ThreeAddrCode(S_TABLE)
     testYacc(inputFile)
-    TAC.print_TAC()
-    S_TABLE.print_temp()
-
+    # TAC.print_TAC()
+    # S_TABLE.print_temp()
+    print "\n#*************** generating .asm code : **************************\n"
     code_gen(TAC,S_TABLE)

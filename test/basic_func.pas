@@ -2,7 +2,7 @@ program basic;
 
 function basic(n:integer): integer;
 begin
-    basic := n + 1;
+    basic := n + 100;
 end;
 
 var
@@ -10,7 +10,7 @@ var
     out : integer;
 
 begin
-    i := 10;
-    out := basic(i) + basic(i+1);
-    write(out, i);
+    read(i);
+    out := basic(i);
+    writeln(out)
 end.

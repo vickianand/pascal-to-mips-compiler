@@ -14,11 +14,10 @@ var
     out : integer;
 
 begin
-    for i := 1 to 16 do
-        // read(i);
-        // out := fib(i);
-        // write(out);
+    for i := 1 to 11 do
+    begin
         out := fib(i);
-        write('...');
-    // out := -111;
+        writeln(out);
+        writeln('=');
+    end;
 end.
