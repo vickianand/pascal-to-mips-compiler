@@ -1040,8 +1040,8 @@ def p_indexed_variable_1(p):
 			if p[0]['type'] != 'ERROR':
 				offset_in_arr = S_TABLE.new_temp(typ='integer')
 				z = S_TABLE.new_temp(typ='integer')
-				TAC.emit(z,1,'',':=')
-				TAC.emit(offset_in_arr,0,'',':=')
+				TAC.emit(z,4,'','int:=')
+				TAC.emit(offset_in_arr,0,'','int:=')
 				y = S_TABLE.new_temp(typ='integer')
 				for lower, length, index_val, in reversed(zip(st_entry['lowers'], st_entry['lengths'], p[3]['list']) ) :
 					# offset_in_arr += z*(index_val - ranges['range_begin'])
@@ -1049,9 +1049,11 @@ def p_indexed_variable_1(p):
 					TAC.emit(y,y,z,'int*')
 					TAC.emit(offset_in_arr,offset_in_arr,y,'int+')
 					TAC.emit(z,z,length,'int*')
-			p[0]['t_name'] = S_TABLE.new_temp(typ='integer')
+			p[0]['t_name'] = S_TABLE.new_temp(typ='integer',array_access=True)
 			TAC.emit(p[0]['t_name'],st_entry['t_name'],offset_in_arr,'ARRAY_MEM_ACCESS')
+			# S_TABLE.update_offset(p[0]['t_name'],offset_in_arr+S_TABLE.get_offset(st_entry['t_name']))
 			p[0]['type'] = st_entry['base_type']
+			# p[0]['array_access'] = True
 	else:
 		p[0]['type'] = 'ERROR'
 		throw_error("Variable not declared")
@@ -1111,7 +1113,7 @@ def p_procedure_statement_1(p):
 			p[0] = {'type' : 'ERROR'}
 
 		if p[0] != {'type' : 'ERROR'} :
-			p[0] = {'type' : 'ERROR'}
+			p[0] = {'type' : 'VOID'}
 			
 	elif st_entry['type'] != 'procedure' :
 		throw_error('this identifier cannot be used as a procedure ')

@@ -20,7 +20,10 @@ class MIPS_Code(object):
 		'$s1' : None, 
 		'$s2' : None, 
 		'$s3' : None, 
-		'$s4' : None
+		'$s4' : None,
+		'$s5' : None, 
+		'$s6' : None, 
+		'$s7' : None
 		}
 		self.free_regs = [register  for register in self.register_descriptor]
 		self.busy_regs = []
@@ -34,13 +37,26 @@ class MIPS_Code(object):
 		self.code[f_n] = []
 		self.currFunc = f_n
 
+	def get_reg_array_access(self,temp,arg_num):
+		reg = '$t'+str(arg_num)
+		self.register_descriptor[reg] = temp
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
+		curr_temp_details['reg'] = reg
+		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+		return reg
+
+
 	def get_reg(self,temp,arg_num):
 		reg = '$t'+str(arg_num)
 		self.register_descriptor[reg] = temp
 		# print temp
 		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
 		curr_temp_details['reg'] = reg
-		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+		if curr_temp_details['array_access']:
+			self.add_line(['lw','$t9', str(curr_temp_details['offset'])+'($sp)' ,''])
+			self.add_line(['lw',reg,'0($t9)',''])
+		else:
+			self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
 		return reg
 
 	def get_f_reg(self,temp,arg_num):
@@ -57,7 +73,18 @@ class MIPS_Code(object):
 		# print temp
 		curr_temp_details = self.symTab.scope_list[func_name].tempList[temp]
 		curr_temp_details['reg'] = reg
-		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+		if curr_temp_details['array_access']:
+			self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+			self.add_line(['lw',reg,'('+reg+')',''])
+		else:
+			self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+		return reg
+
+	def get_addr_reg(self,temp,arg_num):
+		reg = '$t'+str(arg_num)
+		self.register_descriptor[reg] = temp
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
+		self.add_line(['addi',reg,'$sp',curr_temp_details['offset']])
 		return reg
 
 	def get_arg_reg(self,temp,arg_num):
@@ -72,7 +99,11 @@ class MIPS_Code(object):
 		self.register_descriptor[reg] = temp
 		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[temp]
 		curr_temp_details['reg'] = reg
-		self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+		if curr_temp_details['array_access']:
+			self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
+			self.add_line(['lw',reg,'0('+reg+')',''])
+		else:
+			self.add_line(['lw',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
 
 	def load_temp_in_f_reg(self, temp, reg) :
 		self.register_descriptor[reg] = temp
@@ -81,6 +112,17 @@ class MIPS_Code(object):
 		self.add_line(['l.s',reg, str(curr_temp_details['offset'])+'($sp)' ,''])
 
 	def flush_reg(self,reg):
+		if self.register_descriptor[reg] is None:
+			return
+		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[self.register_descriptor[reg]]
+		if curr_temp_details['array_access']:
+			self.add_line(['lw','$t9', str(curr_temp_details['offset'])+'($sp)' ,''])
+			self.add_line(['sw',reg,  '0($t9)' ,''])
+		else:
+			self.add_line(['sw',reg,  str(curr_temp_details['offset'])+'($sp)' ,''])
+		self.register_descriptor[reg] = None
+
+	def flush_reg_array_access(self,reg):
 		if self.register_descriptor[reg] is None:
 			return
 		curr_temp_details = self.symTab.scope_list[self.currFunc].tempList[self.register_descriptor[reg]]
@@ -170,11 +212,4 @@ class MIPS_Code(object):
 
 		with open('temp.asm', 'w') as f:
 			f.write(print_str)
-		return
-
-
-
-
-
-
-		
+		return	

@@ -25,11 +25,14 @@ class Scope:
 		self.EntryList[name]['name'] = name
 		return self.EntryList[name]
 
-	def add_temp(self,name,typ,width,corres_identifier,s_entry):
-		self.tempList[name] = {'offset':self.width,'width':width,'type':typ,'corres_identifier':corres_identifier,'s_entry':s_entry}
+	def add_temp(self,name,typ,width,corres_identifier,s_entry,arr_access):
+		self.tempList[name] = {'offset':self.width,'width':width,'type':typ,'corres_identifier':corres_identifier,'s_entry':s_entry,'array_access':arr_access}
 		self.width += width
 		self.tempList[name]['name'] = name
 		return self.tempList[name]
+
+	# def update_temp_offset(self,name,offset):
+	# 	self.tempList[name]['offset'] = offset
 
 	def look_up(self,name):
 		scope = self
@@ -68,11 +71,17 @@ class SymTable:
 	def end_scope(self):
 		self.currentScope = self.currentScope.parentScope
 
-	def new_temp(self,s_entry={},typ='',width=4,name=''):
+	def new_temp(self,s_entry={},typ='',width=4,name='',array_access=False):
 		self.temp_var_count += 1
 		name2 = "t" + str(self.temp_var_count)
-		self.currentScope.add_temp(name2,typ,width,name,s_entry)
+		self.currentScope.add_temp(name2,typ,width,name,s_entry,array_access)
 		return name2
+
+	# def update_offset(self,name,offset):
+	# 	self.currentScope.update_temp_offset(name,offset)
+
+	# def get_offset(self,name):
+	# 	return self.currentScope.tempList[name]['offset']
 
 	def new_label(self):
 		self.label_count += 1

@@ -112,8 +112,7 @@ def code_gen(TAC,symTab):
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				r3 = M_Code.get_reg(tac[2],3)
-				M_Code.add_line(['slt',r1,r3,r2])
-				M_Code.add_line(['xori',r1,r1,1])
+				M_Code.add_line(['sle',r1,r2,r3])
 				M_Code.flush_reg(r1)
 
 			elif tac[3] == 'real:=' :
@@ -129,7 +128,7 @@ def code_gen(TAC,symTab):
 				r1 = M_Code.get_reg(tac[0],1)
 				r2 = M_Code.get_reg(tac[1],2)
 				r3 = M_Code.get_reg(tac[2],3)
-				M_Code.add_line(['slt',r1,r2,r3])
+				M_Code.add_line(['sle',r1,r3,r2])
 				M_Code.add_line(['xori',r1,r1,1])
 				M_Code.flush_reg(r1)
 
@@ -196,6 +195,14 @@ def code_gen(TAC,symTab):
 
 			elif tac[3] == 'FUNC_BEGIN':
 				M_Code.add_line(['sw','$ra','-8($fp)',''])
+
+			elif tac[3] == 'ARRAY_MEM_ACCESS':
+				r1 = M_Code.get_reg_array_access(tac[0],1)
+				r2 = M_Code.get_reg(tac[2],2)
+				r3 = M_Code.get_addr_reg(tac[1],3)
+				M_Code.add_line(['add',r1,r2,r3])
+				M_Code.flush_reg_array_access(r1)
+
 
 			else:
 				print tac[3] + " not implemented"
