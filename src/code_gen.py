@@ -87,6 +87,28 @@ def code_gen(TAC,symTab):
 				M_Code.flush_f_reg(r1)
 
 
+			elif tac[3] == 'intxor':
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				r3 = M_Code.get_reg(tac[2],3)
+				M_Code.add_line(['xor',r1,r2,r3])
+				M_Code.flush_reg(r1)
+
+			elif tac[3] == 'intand':
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				r3 = M_Code.get_reg(tac[2],3)
+				M_Code.add_line(['and',r1,r2,r3])
+				M_Code.flush_reg(r1)
+
+			elif tac[3] == 'intor':
+				r1 = M_Code.get_reg(tac[0],1)
+				r2 = M_Code.get_reg(tac[1],2)
+				r3 = M_Code.get_reg(tac[2],3)
+				M_Code.add_line(['or',r1,r2,r3])
+				M_Code.flush_reg(r1)
+
+
 			# ******************** mulops *************************
 
 			elif tac[3] == 'real*':
